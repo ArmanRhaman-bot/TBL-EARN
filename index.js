@@ -87,26 +87,41 @@ app.post("/ton/send", async (req, res) => {
     const balance =
   await contract.getBalance()
 
+console.log(
+  "WALLET:",
+  wallet.address.toString()
+)
+
+console.log(
+  "BALANCE RAW:",
+  balance.toString()
+)
+
+console.log(
+  "BALANCE TON:",
+  Number(balance) / 1e9
+)
+
+console.log(
+  "SEND:",
+  amount
+)
+
 const sendAmount =
   toNano(amount.toString())
 
 const gasReserve =
-  toNano("0.03")
+  toNano("0.01")
 
 const required =
   sendAmount + gasReserve
 
 console.log(
-  "BALANCE:",
-  balance.toString()
-)
-
-console.log(
   "REQUIRED:",
-  required.toString()
+  Number(required) / 1e9
 )
 
-if (balance < required) {
+if (BigInt(balance) < BigInt(required)) {
 
   return res.json({
     success: false,
