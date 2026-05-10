@@ -85,21 +85,36 @@ app.post("/ton/send", async (req, res) => {
 
     // balance check
     const balance =
-      await contract.getBalance()
+  await contract.getBalance()
 
-    const sendAmount = toNano(amount)
+const sendAmount =
+  toNano(amount.toString())
 
-    // reserve small gas
-    const gasReserve = toNano("0.03")
+const gasReserve =
+  toNano("0.03")
 
-    if (balance < sendAmount + gasReserve) {
+const required =
+  sendAmount + gasReserve
 
-      return res.json({
-        success: false,
-        error: "Insufficient wallet balance"
-      })
+console.log(
+  "BALANCE:",
+  balance.toString()
+)
 
-    }
+console.log(
+  "REQUIRED:",
+  required.toString()
+)
+
+if (balance < required) {
+
+  return res.json({
+    success: false,
+    error:
+      "Insufficient wallet balance"
+  })
+
+}
 
     // seqno
     const seqno =
