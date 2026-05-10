@@ -161,19 +161,16 @@ if (BigInt(balance) < BigInt(required)) {
 
     // tx hash placeholder
     // TON doesn't instantly expose tx hash easily
-    const walletAddr =
-  wallet.address.toString()
-
-const explorerLink =
+    const txLink =
 
   "https://tonviewer.com/" +
-  walletAddr
+  walletAddress
 
 return res.json({
 
   success: true,
 
-  tx_hash: explorerLink
+  tx_hash: txLink
 
 })
 
