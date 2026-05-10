@@ -90,7 +90,7 @@ app.post("/ton/send", async (req, res) => {
     const sendAmount = toNano(amount)
 
     // reserve small gas
-    const gasReserve = toNano("0.05")
+    const gasReserve = toNano("0.01")
 
     if (balance < sendAmount + gasReserve) {
 
