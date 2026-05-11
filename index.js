@@ -191,16 +191,18 @@ return res.json({
 
 app.post("/create", (req, res) => {
 
-  let api_key = req.body.api_key
+  let master_key = req.body.master_key
   let user_id = req.body.user_id
+  let api_key = req.body.api_key
 
   if(!api_key || !user_id){
     return res.json({
-      success:false
+      success:false,
+      error:"Missing fields"
     })
   }
 
-  if(api_key !== process.env.MASTER_KEY){
+  if(master_key !== process.env.MASTER_KEY){
     return res.json({
       success:false,
       error:"Unauthorized"
