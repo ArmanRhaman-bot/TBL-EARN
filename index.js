@@ -195,25 +195,25 @@ app.post("/create", (req, res) => {
   let user_id = req.body.user_id
 
   if(!api_key || !user_id){
-
     return res.json({
       success:false
     })
+  }
 
+  if(api_key !== process.env.MASTER_KEY){
+    return res.json({
+      success:false,
+      error:"Unauthorized"
+    })
   }
 
   users[api_key] = {
-
     user_id:user_id,
-
     balance:0
-
   }
 
   return res.json({
-
     success:true
-
   })
 
 })
