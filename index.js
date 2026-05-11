@@ -187,37 +187,88 @@ return res.json({
 app.get("/docs", (req, res) => {
 
 res.send(`
+
 <!DOCTYPE html>
 
 <html>
 
 <head>
 
-<title>TBL EARN API</title>
+<title>TBL EARN API DOCS</title>
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
 <style>
 
 body{
-background:#0f172a;
-color:white;
-font-family:Arial;
-padding:20px;
+  background:#081224;
+  color:white;
+  font-family:Arial;
+  padding:20px;
+  margin:0;
+}
+
+.title{
+  font-size:32px;
+  font-weight:bold;
+  margin-bottom:20px;
+  color:#35b6ff;
 }
 
 .card{
-background:#1e293b;
-padding:20px;
-border-radius:12px;
-margin-top:20px;
+  background:#132238;
+  padding:20px;
+  border-radius:18px;
+  margin-top:20px;
+  box-shadow:0 0 10px rgba(0,0,0,0.3);
 }
 
-code{
-background:black;
-padding:10px;
-display:block;
-border-radius:10px;
-overflow:auto;
-color:#00ff88;
+.codeBox{
+  position:relative;
+  margin-top:15px;
+}
+
+pre{
+  background:#000;
+  color:#00ff88;
+  padding:15px;
+  border-radius:12px;
+  overflow:auto;
+  font-size:14px;
+  white-space:pre-wrap;
+  word-wrap:break-word;
+}
+
+.copyBtn{
+  position:absolute;
+  top:10px;
+  right:10px;
+  border:none;
+  background:#35b6ff;
+  color:white;
+  padding:8px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.copyBtn:hover{
+  opacity:0.8;
+}
+
+.success{
+  color:#00ff88;
+}
+
+.error{
+  color:#ff4d4d;
+}
+
+.footer{
+  text-align:center;
+  margin-top:30px;
+  color:#aaa;
 }
 
 </style>
@@ -226,15 +277,30 @@ color:#00ff88;
 
 <body>
 
-<h1>🚀 TBL EARN API DOCS</h1>
+<div class="title">
+🚀 TBL EARN API DOCS
+</div>
 
 <div class="card">
 
 <h2>POST /ton/send</h2>
 
-<code>
+<p>
+Send TON instantly
+</p>
+
+<div class="codeBox">
+
+<button class="copyBtn"
+onclick="copyText('endpointCode')">
+Copy
+</button>
+
+<pre id="endpointCode">
 POST /ton/send
-</code>
+</pre>
+
+</div>
 
 </div>
 
@@ -242,10 +308,19 @@ POST /ton/send
 
 <h2>Headers</h2>
 
-<code>
+<div class="codeBox">
+
+<button class="copyBtn"
+onclick="copyText('headerCode')">
+Copy
+</button>
+
+<pre id="headerCode">
 x-api-key: YOUR_API_KEY
 Content-Type: application/json
-</code>
+</pre>
+
+</div>
 
 </div>
 
@@ -253,18 +328,132 @@ Content-Type: application/json
 
 <h2>Body</h2>
 
-<code>
+<div class="codeBox">
+
+<button class="copyBtn"
+onclick="copyText('bodyCode')">
+Copy
+</button>
+
+<pre id="bodyCode">
 {
- "wallet":"UQXXXX",
- "amount":0.05
+  "wallet":"UQXXXX",
+  "amount":"0.05"
 }
-</code>
+</pre>
 
 </div>
+
+</div>
+
+<div class="card">
+
+<h2>TBL Example</h2>
+
+<div class="codeBox">
+
+<button class="copyBtn"
+onclick="copyText('tblCode')">
+Copy
+</button>
+
+<pre id="tblCode">
+HTTP.post({
+
+  url:
+  "https://your-api.up.railway.app/ton/send",
+
+  headers:{
+    "x-api-key":"API_KEY",
+    "Content-Type":"application/json"
+  },
+
+  body:{
+    wallet:"UQXXXX",
+    amount:"0.05"
+  },
+
+  success:"/done",
+  error:"/failed"
+
+})
+</pre>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2 class="success">
+✅ Success Response
+</h2>
+
+<div class="codeBox">
+
+<button class="copyBtn"
+onclick="copyText('successCode')">
+Copy
+</button>
+
+<pre id="successCode">
+{
+  "success":true,
+  "tx_hash":"TON_TX_HASH"
+}
+</pre>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2 class="error">
+❌ Error Response
+</h2>
+
+<div class="codeBox">
+
+<button class="copyBtn"
+onclick="copyText('errorCode')">
+Copy
+</button>
+
+<pre id="errorCode">
+{
+  "success":false,
+  "error":"Insufficient balance"
+}
+</pre>
+
+</div>
+
+</div>
+
+<div class="footer">
+TBL EARN API © 2026
+</div>
+
+<script>
+
+function copyText(id){
+
+  const text =
+  document.getElementById(id).innerText
+
+  navigator.clipboard.writeText(text)
+
+  alert("Copied!")
+
+}
+
+</script>
 
 </body>
 
 </html>
+
 `)
 
 })
