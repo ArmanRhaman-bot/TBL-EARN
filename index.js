@@ -188,34 +188,25 @@ return res.json({
 
 
 // CREATE USER
-
 app.post("/create", (req, res) => {
 
-  let master_key = req.body.master_key
   let user_id = req.body.user_id
   let api_key = req.body.api_key
 
   if(!api_key || !user_id){
     return res.json({
-      success:false,
-      error:"Missing fields"
-    })
-  }
-
-  if(master_key !== process.env.MASTER_KEY){
-    return res.json({
-      success:false,
-      error:"Unauthorized"
+      success: false,
+      error: "Missing fields"
     })
   }
 
   users[api_key] = {
-    user_id:user_id,
-    balance:0
+    user_id: user_id,
+    balance: 0
   }
 
   return res.json({
-    success:true
+    success: true
   })
 
 })
