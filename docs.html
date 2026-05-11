@@ -1,0 +1,10 @@
+const path = require("path")
+
+app.get("/docs", (req, res) => {
+
+const filePath =
+path.join(__dirname, "docs.html")
+
+res.sendFile(filePath)
+
+})
