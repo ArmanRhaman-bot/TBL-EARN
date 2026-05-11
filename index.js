@@ -188,8 +188,11 @@ app.get("/docs", (req, res) => {
 
 res.send(`
 <!DOCTYPE html>
+
 <html>
+
 <head>
+
 <title>TBL EARN API</title>
 
 <style>
@@ -217,10 +220,6 @@ overflow:auto;
 color:#00ff88;
 }
 
-h1{
-color:#38bdf8;
-}
-
 </style>
 
 </head>
@@ -232,8 +231,6 @@ color:#38bdf8;
 <div class="card">
 
 <h2>POST /ton/send</h2>
-
-<p>Send TON instantly</p>
 
 <code>
 POST /ton/send
@@ -265,36 +262,13 @@ Content-Type: application/json
 
 </div>
 
-<div class="card">
-
-<h2>TBL Example</h2>
-
-<code>
-HTTP.post({
-
-url:
-"https://tbl-earn-production.up.railway.app/ton/send",
-
-headers:{
-"x-api-key":"YOUR_API_KEY",
-"Content-Type":"application/json"
-},
-
-body:{
-wallet:"UQXXXX",
-amount:0.05
-}
-
-})
-</code>
-
-</div>
-
 </body>
+
 </html>
 `)
 
 })
+
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
