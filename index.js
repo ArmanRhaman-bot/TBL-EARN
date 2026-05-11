@@ -1,9 +1,6 @@
 const express = require("express")
 const dotenv = require("dotenv")
 
-const WALLET_ADDRESS =
-process.env.WALLET_ADDRESS
-
 let users = {}
 
 dotenv.config()
