@@ -4,7 +4,7 @@ const dotenv = require("dotenv")
 const WALLET_ADDRESS =
 process.env.WALLET_ADDRESS
 
-
+let users = {}
 dotenv.config()
 
 const {
@@ -188,9 +188,6 @@ return res.json({
 
 })
 
-// fake database
-
-let users = {}
 
 // CREATE USER
 
@@ -249,36 +246,7 @@ app.get("/:api_key/balance", (req, res) => {
 
 })
 
-// ADD BALANCE
 
-app.post("/:api_key/add_balance", (req, res) => {
-
-  let api_key = req.params.api_key
-
-  let amount =
-  parseFloat(req.body.amount)
-
-  let user = users[api_key]
-
-  if(!user){
-
-    return res.json({
-      success:false
-    })
-
-  }
-
-  user.balance += amount
-
-  return res.json({
-
-    success:true,
-
-    balance:user.balance
-
-  })
-
-})
 
 app.get("/docs", (req, res) => {
 
