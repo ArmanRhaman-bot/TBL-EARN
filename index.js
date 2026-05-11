@@ -2,6 +2,12 @@ const express = require("express")
 const dotenv = require("dotenv")
 const axios = require("axios")
 
+const deposits = {}
+
+const WALLET_ADDRESS =
+process.env.WALLET_ADDRESS
+
+
 dotenv.config()
 
 const {
@@ -804,90 +810,67 @@ const processedTxs = new Set()
 
 // auto deposit scanner
 
-async function scanDeposits(){
+async function checkDeposits() {
 
   try {
 
-    const wallet =
-    process.env.MASTER_WALLET
+    const response = await axios.get(
+      "https://toncenter.com/api/v2/getTransactions",
+      {
+        params: {
+          address: WALLET_ADDRESS,
+          limit: 20,
+          api_key: process.env.TON_API_KEY
+        }
+      }
+    )
 
-    const url =
-    "https://toncenter.com/api/v2/getTransactions?address="
-    + wallet +
-    "&limit=10"
+    const txs = response.data.result
 
-    const response =
-    await axios.get(url)
+    for (const tx of txs) {
 
-    const txs =
-    response.data.result
+      let msg = ""
 
-    for (const tx of txs){
-
-      const hash =
-      tx.transaction_id.hash
-
-      // skip processed
-
-      if(processedTxs.has(hash)){
-        continue
+      if (
+        tx.in_msg &&
+        tx.in_msg.message
+      ) {
+        msg = tx.in_msg.message
       }
 
-      processedTxs.add(hash)
-
-      const incoming =
-      tx.in_msg
-
-      if(!incoming){
-        continue
+      if (
+        tx.in_msg &&
+        tx.in_msg.msg_data &&
+        tx.in_msg.msg_data.text
+      ) {
+        msg = tx.in_msg.msg_data.text
       }
 
-      const value =
-      Number(incoming.value) / 1e9
+      console.log("MEMO:", msg)
 
-      const memo =
-      incoming.message || ""
-
-      // must contain TBL_
-
-      if(!memo.startsWith("TBL_")){
+      if (!msg.startsWith("TBL_")) {
         continue
       }
 
       const userId =
-      memo.replace("TBL_", "")
+        msg.replace("TBL_", "")
 
-      console.log("==========")
-
-      console.log(
-        "NEW DEPOSIT DETECTED"
-      )
+      const amount =
+        Number(tx.in_msg.value) / 1e9
 
       console.log(
-        "USER:",
-        userId
+        "DEPOSIT FOUND:",
+        userId,
+        amount
       )
 
-      console.log(
-        "AMOUNT:",
-        value
-      )
-
-      console.log(
-        "MEMO:",
-        memo
-      )
-
-      console.log(
-        "HASH:",
-        hash
-      )
-
-      console.log("==========")
+      deposits[userId] = {
+        amount: amount
+      }
 
     }
 
-  } catch (e){
+  } catch (e) {
 
     console.log(
       "SCAN ERROR:",
@@ -898,10 +881,27 @@ async function scanDeposits(){
 
 }
 
-// scan every 10 sec
+setInterval(checkDeposits, 10000)
 
-setInterval(() => {
+app.get("/check/:id", (req, res) => {
 
-  scanDeposits()
+  const id = req.params.id
 
-}, 10000)
+  if (!deposits[id]) {
+
+    return res.json({
+      success: false
+    })
+
+  }
+
+  const data = deposits[id]
+
+  delete deposits[id]
+
+  return res.json({
+    success: true,
+    amount: data.amount
+  })
+
+})
