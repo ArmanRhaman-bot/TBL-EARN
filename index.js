@@ -189,7 +189,158 @@ return res.json({
 
 })
 
+// USDT TON Withdraw Route
 
+app.post("/usdt/send", async (req, res) => {
+
+  try {
+
+    // API KEY
+    const apiKey =
+      req.headers["x-api-key"]
+
+    if(apiKey !== process.env.API_KEY){
+
+      return res.json({
+        success:false,
+        error:"Invalid API key"
+      })
+
+    }
+
+    // BODY
+    const walletAddress =
+      req.body.wallet
+
+    const amount =
+      parseFloat(req.body.amount)
+
+    if(!walletAddress){
+
+      return res.json({
+        success:false,
+        error:"Wallet missing"
+      })
+
+    }
+
+    if(!amount || amount <= 0){
+
+      return res.json({
+        success:false,
+        error:"Invalid amount"
+      })
+
+    }
+
+    // ENDPOINT
+    const endpoint =
+      await getHttpEndpoint()
+
+    const client =
+      new TonClient({
+        endpoint
+      })
+
+    // MNEMONIC
+    const mnemonic =
+      process.env.MNEMONIC.split(" ")
+
+    // KEYPAIR
+    const keyPair =
+      await mnemonicToPrivateKey(
+        mnemonic
+      )
+
+    // WALLET
+    const wallet =
+      WalletContractV4.create({
+        workchain:0,
+        publicKey:keyPair.publicKey
+      })
+
+    const contract =
+      client.open(wallet)
+
+    // USDT MASTER
+    const USDT_MASTER =
+      Address.parse(
+        "EQCxE6mUtQJKFnf..."
+      )
+
+    // OPEN MASTER
+    const master =
+      client.open(
+        JettonMaster.create(
+          USDT_MASTER
+        )
+      )
+
+    // GET JETTON WALLET
+    const jettonWalletAddress =
+      await master.getWalletAddress(
+        wallet.address
+      )
+
+    // OPEN JETTON WALLET
+    const jettonWallet =
+      client.open(
+        JettonWallet.create(
+          jettonWalletAddress
+        )
+      )
+
+    // SEND USDT
+    await jettonWallet.sendTransfer(
+
+      contract.sender(
+        keyPair.secretKey
+      ),
+
+      toNano("0.05"),
+
+      {
+
+        amount:
+          BigInt(
+            Math.floor(
+              amount * 1000000
+            )
+          ),
+
+        destination:
+          Address.parse(
+            walletAddress
+          ),
+
+        responseAddress:
+          wallet.address
+
+      }
+
+    )
+
+    return res.json({
+
+      success:true,
+
+      message:"USDT Sent"
+
+    })
+
+  } catch(e){
+
+    return res.json({
+
+      success:false,
+
+      error:e.message
+
+    })
+
+  }
+
+})
 //DOCS
 const path = require("path")
 
