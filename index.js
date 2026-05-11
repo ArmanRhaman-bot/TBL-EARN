@@ -194,7 +194,7 @@ res.send(`
 
 <head>
 
-<title>TBL EARN API DOCS</title>
+<title>SAFEORA API DOCS</title>
 
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
@@ -277,8 +277,7 @@ pre{
 
 <body>
 
-<div class="title">
-🚀 TBL EARN API DOCS
+<div class="title">💎 SAFEORA API DOCS
 </div>
 
 <div class="card">
