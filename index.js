@@ -244,6 +244,18 @@ app.get("/:api_key/balance", (req, res) => {
 
 })
 
+
+//DOCS
+const path = require("path")
+
+app.get("/docs", (req, res) => {
+
+  res.sendFile(
+    path.join(__dirname, "docs.html")
+  )
+
+})
+
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
