@@ -810,16 +810,25 @@ const processedTxs = new Set()
 
 // auto deposit scanner
 
-async function checkDeposits() {
+app.get("/check-payment", async (req, res) => {
 
   try {
+
+    const memo = req.query.memo
+
+    if (!memo) {
+      return res.json({
+        success: false,
+        error: "Memo missing"
+      })
+    }
 
     const response = await axios.get(
       "https://toncenter.com/api/v2/getTransactions",
       {
         params: {
-          address: WALLET_ADDRESS,
-          limit: 20,
+          address: process.env.WALLET_ADDRESS,
+          limit: 30,
           api_key: process.env.TON_API_KEY
         }
       }
@@ -829,13 +838,13 @@ async function checkDeposits() {
 
     for (const tx of txs) {
 
-      let msg = ""
+      let text = ""
 
       if (
         tx.in_msg &&
         tx.in_msg.message
       ) {
-        msg = tx.in_msg.message
+        text = tx.in_msg.message
       }
 
       if (
@@ -843,65 +852,36 @@ async function checkDeposits() {
         tx.in_msg.msg_data &&
         tx.in_msg.msg_data.text
       ) {
-        msg = tx.in_msg.msg_data.text
+        text = tx.in_msg.msg_data.text
       }
 
-      console.log("MEMO:", msg)
+      console.log("TX MEMO:", text)
 
-      if (!msg.startsWith("TBL_")) {
-        continue
-      }
+      if (text === memo) {
 
-      const userId =
-        msg.replace("TBL_", "")
+        const amount =
+          Number(tx.in_msg.value) / 1e9
 
-      const amount =
-        Number(tx.in_msg.value) / 1e9
+        return res.json({
+          success: true,
+          amount: amount
+        })
 
-      console.log(
-        "DEPOSIT FOUND:",
-        userId,
-        amount
-      )
-
-      deposits[userId] = {
-        amount: amount
       }
 
     }
-
-  } catch (e) {
-
-    console.log(
-      "SCAN ERROR:",
-      e.message
-    )
-
-  }
-
-}
-
-setInterval(checkDeposits, 10000)
-
-app.get("/check/:id", (req, res) => {
-
-  const id = req.params.id
-
-  if (!deposits[id]) {
 
     return res.json({
       success: false
     })
 
+  } catch (e) {
+
+    return res.json({
+      success: false,
+      error: e.message
+    })
+
   }
-
-  const data = deposits[id]
-
-  delete deposits[id]
-
-  return res.json({
-    success: true,
-    amount: data.amount
-  })
 
 })
