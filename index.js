@@ -7,9 +7,6 @@ dotenv.config()
 const app = express()
 
 app.use(express.json())
-app.use(express.urlencoded({
-  extended:true
-}))
 
 const {
   TonClient,
@@ -189,81 +186,6 @@ return res.json({
     })
 
   }
-
-})
-
-
-// CREATE USER
-app.post("/create", (req, res) => {
-
-  let user_id = req.body.user_id
-  let api_key = req.body.api_key
-
-  if(!api_key || !user_id){
-    return res.json({
-      success: false,
-      error: "Missing fields"
-    })
-  }
-
-  users[api_key] = {
-    user_id: user_id,
-    balance: 0
-  }
-
-  return res.json({
-    success: true
-  })
-
-})
-
-// ADD BALANCE
-app.post("/add-balance", (req, res) => {
-
-  let master_key = req.body.master_key
-  let api_key = req.body.api_key
-  let amount = parseFloat(req.body.amount)
-
-  if(master_key !== process.env.MASTER_KEY){
-    return res.json({
-      success: false,
-      error: "Unauthorized"
-    })
-  }
-
-  if(!users[api_key]){
-    return res.json({
-      success: false,
-      error: "User not found"
-    })
-  }
-
-  users[api_key].balance += amount
-
-  return res.json({
-    success: true,
-    balance: users[api_key].balance
-  })
-
-})
-
-// CHECK BALANCE
-app.get("/:api_key/balance", (req, res) => {
-
-  let api_key = req.params.api_key
-  let user = users[api_key]
-
-  if(!user){
-    return res.json({
-      success: false,
-      error: "User not found"
-    })
-  }
-
-  return res.json({
-    success: true,
-    balance: user.balance
-  })
 
 })
 
