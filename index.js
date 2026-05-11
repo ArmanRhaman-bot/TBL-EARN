@@ -184,6 +184,68 @@ return res.json({
 
 })
 
+// deposit info
+
+app.post("/ton/deposit", async (req, res) => {
+
+  try {
+
+    const apiKey =
+    req.headers["x-api-key"]
+
+    if (apiKey !== process.env.API_KEY) {
+
+      return res.json({
+        success: false,
+        error: "Invalid API key"
+      })
+
+    }
+
+    const userId =
+    req.body.user_id
+
+    if (!userId) {
+
+      return res.json({
+        success: false,
+        error: "user_id missing"
+      })
+
+    }
+
+    // unique memo/comment
+    const memo =
+    "TBL_" + userId
+
+    // master wallet
+    const wallet =
+    process.env.MASTER_WALLET
+
+    return res.json({
+
+      success: true,
+
+      deposit_address: wallet,
+
+      memo: memo,
+
+      instruction:
+      "Send TON with memo/comment"
+
+    })
+
+  } catch (e) {
+
+    return res.json({
+      success: false,
+      error: e.message
+    })
+
+  }
+
+})
+
 app.get("/docs", (req, res) => {
 
 res.send(`
