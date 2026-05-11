@@ -11,10 +11,6 @@ app.use(express.urlencoded({
   extended:true
 }))
 
-let users = {}
-
-dotenv.config()
-
 const {
   TonClient,
   WalletContractV4,
