@@ -1,5 +1,6 @@
 const express = require("express")
 const dotenv = require("dotenv")
+const axios = require("axios")
 
 dotenv.config()
 
@@ -766,3 +767,111 @@ const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
   console.log("TON API STARTED")
 })
+
+// processed txs
+
+const processedTxs = new Set()
+
+// auto deposit scanner
+
+async function scanDeposits(){
+
+  try {
+
+    const wallet =
+    process.env.MASTER_WALLET
+
+    const url =
+    "https://toncenter.com/api/v2/getTransactions?address="
+    + wallet +
+    "&limit=10"
+
+    const response =
+    await axios.get(url)
+
+    const txs =
+    response.data.result
+
+    for (const tx of txs){
+
+      const hash =
+      tx.transaction_id.hash
+
+      // skip processed
+
+      if(processedTxs.has(hash)){
+        continue
+      }
+
+      processedTxs.add(hash)
+
+      const incoming =
+      tx.in_msg
+
+      if(!incoming){
+        continue
+      }
+
+      const value =
+      Number(incoming.value) / 1e9
+
+      const memo =
+      incoming.message || ""
+
+      // must contain TBL_
+
+      if(!memo.startsWith("TBL_")){
+        continue
+      }
+
+      const userId =
+      memo.replace("TBL_", "")
+
+      console.log("==========")
+
+      console.log(
+        "NEW DEPOSIT DETECTED"
+      )
+
+      console.log(
+        "USER:",
+        userId
+      )
+
+      console.log(
+        "AMOUNT:",
+        value
+      )
+
+      console.log(
+        "MEMO:",
+        memo
+      )
+
+      console.log(
+        "HASH:",
+        hash
+      )
+
+      console.log("==========")
+
+    }
+
+  } catch (e){
+
+    console.log(
+      "SCAN ERROR:",
+      e.message
+    )
+
+  }
+
+}
+
+// scan every 10 sec
+
+setInterval(() => {
+
+  scanDeposits()
+
+}, 10000)
