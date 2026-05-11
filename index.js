@@ -1,9 +1,15 @@
 const express = require("express")
+const dotenv = require("dotenv")
+const path = require("path")
+
+dotenv.config()
 
 const app = express()
 
 app.use(express.json())
-const dotenv = require("dotenv")
+app.use(express.urlencoded({
+  extended:true
+}))
 
 let users = {}
 
