@@ -246,6 +246,36 @@ app.post("/ton/deposit", async (req, res) => {
   }
 
 })
+// detected deposits
+
+let detectedDeposits = []
+console.log("==========")
+detectedDeposits.push({
+
+  user: userId,
+
+  amount: value,
+
+  memo: memo,
+
+  hash: hash
+
+})
+
+// get deposits
+
+app.get("/check", (req, res) => {
+
+  const data =
+  [...detectedDeposits]
+
+  detectedDeposits = []
+
+  res.json({
+    deposits: data
+  })
+
+})
 
 app.get("/docs", (req, res) => {
 
