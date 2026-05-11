@@ -5,9 +5,7 @@ const WALLET_ADDRESS =
 process.env.WALLET_ADDRESS
 
 let users = {}
-users[api_key] = {
-  balance: 0
-}
+
 dotenv.config()
 
 const {
