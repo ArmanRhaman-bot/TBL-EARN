@@ -188,6 +188,97 @@ return res.json({
 
 })
 
+// fake database
+
+let users = {}
+
+// CREATE USER
+
+app.post("/create", (req, res) => {
+
+  let api_key = req.body.api_key
+  let user_id = req.body.user_id
+
+  if(!api_key || !user_id){
+
+    return res.json({
+      success:false
+    })
+
+  }
+
+  users[api_key] = {
+
+    user_id:user_id,
+
+    balance:0
+
+  }
+
+  return res.json({
+
+    success:true
+
+  })
+
+})
+
+// CHECK BALANCE
+
+app.get("/:api_key/balance", (req, res) => {
+
+  let api_key = req.params.api_key
+
+  let user = users[api_key]
+
+  if(!user){
+
+    return res.json({
+      success:false
+    })
+
+  }
+
+  return res.json({
+
+    success:true,
+
+    balance:user.balance
+
+  })
+
+})
+
+// ADD BALANCE
+
+app.post("/:api_key/add_balance", (req, res) => {
+
+  let api_key = req.params.api_key
+
+  let amount =
+  parseFloat(req.body.amount)
+
+  let user = users[api_key]
+
+  if(!user){
+
+    return res.json({
+      success:false
+    })
+
+  }
+
+  user.balance += amount
+
+  return res.json({
+
+    success:true,
+
+    balance:user.balance
+
+  })
+
+})
 
 app.get("/docs", (req, res) => {
 
