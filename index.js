@@ -220,28 +220,52 @@ app.post("/create", (req, res) => {
 
 })
 
-// CHECK BALANCE
+// ADD BALANCE
+app.post("/add-balance", (req, res) => {
 
+  let master_key = req.body.master_key
+  let api_key = req.body.api_key
+  let amount = parseFloat(req.body.amount)
+
+  if(master_key !== process.env.MASTER_KEY){
+    return res.json({
+      success: false,
+      error: "Unauthorized"
+    })
+  }
+
+  if(!users[api_key]){
+    return res.json({
+      success: false,
+      error: "User not found"
+    })
+  }
+
+  users[api_key].balance += amount
+
+  return res.json({
+    success: true,
+    balance: users[api_key].balance
+  })
+
+})
+
+// CHECK BALANCE
 app.get("/:api_key/balance", (req, res) => {
 
   let api_key = req.params.api_key
-
   let user = users[api_key]
 
   if(!user){
-
     return res.json({
-      success:false
+      success: false,
+      error: "User not found"
     })
-
   }
 
   return res.json({
-
-    success:true,
-
-    balance:user.balance
-
+    success: true,
+    balance: user.balance
   })
 
 })
