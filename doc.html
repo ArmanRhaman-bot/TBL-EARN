@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>SAFEORA · TON API Reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #03080f;
+      --surface: #060e1a;
+      --surface2: #0b1625;
+      --border: rgba(53, 182, 255, 0.12);
+      --accent: #35b6ff;
+      --accent2: #00ffa3;
+      --accent3: #7b5fff;
+      --text: #e2eeff;
+      --muted: #4a6080;
+      --danger: #ff4d6a;
+      --success: #00ffa3;
+      --glow: rgba(53, 182, 255, 0.15);
+      --radius-sm: 12px;
+      --radius-md: 18px;
+      --radius-lg: 22px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated grid background */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(53, 182, 255, 0.05) 1.2px, transparent 1.2px),
+        linear-gradient(90deg, rgba(53, 182, 255, 0.05) 1.2px, transparent 1.2px);
+      background-size: 44px 44px;
+      pointer-events: none;
+      z-index: 0;
+      animation: subtleGrid 18s infinite alternate ease-in-out;
+    }
+
+    @keyframes subtleGrid {
+      0% { opacity: 0.7; background-size: 44px 44px; }
+      100% { opacity: 1; background-size: 46px 46px; }
+    }
+
+    /* Ambient orbs with breathing effect */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(130px);
+      pointer-events: none;
+      z-index: 0;
+      will-change: transform;
+    }
+    .orb-1 {
+      width: 650px;
+      height: 650px;
+      background: radial-gradient(circle at 30% 30%, rgba(53, 182, 255, 0.12), transparent 70%);
+      top: -220px;
+      left: -180px;
+      animation: floatOrb1 13s infinite alternate ease-in-out;
+    }
+    .orb-2 {
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle at 70% 70%, rgba(0, 255, 163, 0.08), transparent 70%);
+      bottom: -180px;
+      right: -120px;
+      animation: floatOrb2 14s infinite alternate ease-in-out;
+    }
+    .orb-3 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle at 50% 50%, rgba(123, 95, 255, 0.07), transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: pulseOrb 10s infinite alternate;
+    }
+
+    @keyframes floatOrb1 {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, 30px) scale(1.02); }
+    }
+    @keyframes floatOrb2 {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-25px, -25px) scale(1.03); }
+    }
+    @keyframes pulseOrb {
+      0% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.9); }
+      100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* Header with subtle glass effect */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 60px;
+      animation: fadeDown 0.7s cubic-bezier(0.12, 0.63, 0.25, 1) both;
+      flex-wrap: wrap;
+    }
+
+    .logo-badge {
+      width: 56px;
+      height: 56px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px rgba(0, 200, 255, 0.35);
+      flex-shrink: 0;
+      overflow: hidden;
+      background: #050d18;
+      border: 1px solid rgba(53, 182, 255, 0.25);
+      transition: box-shadow 0.3s ease;
+    }
+    .logo-badge:hover {
+      box-shadow: 0 0 45px rgba(0, 255, 163, 0.5);
+    }
+    .logo-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .header-text h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.7px;
+      background: linear-gradient(135deg, #ffffff 0%, #35b6ff 60%, #00ffa3 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+    }
+
+    .header-text p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.6px;
+      font-weight: 400;
+    }
+
+    .version-pill {
+      margin-left: auto;
+      background: rgba(53, 182, 255, 0.08);
+      border: 1px solid rgba(53, 182, 255, 0.28);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 24px;
+      letter-spacing: 1px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 18px;
+      margin-top: 52px;
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-label::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(to right, rgba(53,182,255,0.2), transparent);
+      margin-left: 8px;
+    }
+
+    .endpoint-hero {
+      background: linear-gradient(145deg, #0c1829 0%, #08101e 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 34px;
+      margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.6s cubic-bezier(0.12, 0.63, 0.25, 1) 0.1s both;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 18px 35px -15px rgba(0,0,0,0.7);
+      transition: border-color 0.25s;
+    }
+    .endpoint-hero:hover {
+      border-color: rgba(53,182,255,0.3);
+    }
+    .endpoint-hero::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+      opacity: 0.75;
+    }
+
+    .method-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .method-badge {
+      background: linear-gradient(135deg, #1a4d7a, #0b2640);
+      color: #a5e0ff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(53, 182, 255, 0.4);
+      letter-spacing: 1px;
+      text-shadow: 0 0 6px rgba(53,182,255,0.5);
+    }
+
+    .endpoint-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 500;
+      color: #fff;
+      letter-spacing: 0.3px;
+      word-break: break-word;
+    }
+
+    .endpoint-desc {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.7;
+      max-width: 80%;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.3s;
+      animation: fadeUp 0.55s cubic-bezier(0.12, 0.63, 0.25, 1) both;
+      backdrop-filter: blur(2px);
+    }
+    .card:hover {
+      border-color: rgba(53, 182, 255, 0.3);
+      box-shadow: 0 12px 28px -12px rgba(53,182,255,0.12);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 16, 28, 0.7);
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      color: #cddef5;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+      transition: transform 0.2s;
+    }
+    .dot.green { background: var(--success); box-shadow: 0 0 12px var(--success); }
+    .dot.red { background: var(--danger); box-shadow: 0 0 12px var(--danger); }
+    .dot.purple { background: var(--accent3); box-shadow: 0 0 10px var(--accent3); }
+
+    .code-wrap {
+      position: relative;
+    }
+
+    pre {
+      background: #020810;
+      color: #7dd3fc;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.75;
+      padding: 22px 22px;
+      overflow-x: auto;
+      white-space: pre;
+      tab-size: 2;
+      border-radius: 0 0 var(--radius-md) var(--radius-md);
+      margin: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent) #020810;
+    }
+
+    .t-key { color: #7dd3fc; font-weight: 500; }
+    .t-str { color: #86efac; }
+    .t-num { color: #fda4af; }
+    .t-bool { color: #c4b5fd; }
+    .t-punct { color: #5e6d82; }
+    .t-meth { color: #fb923c; }
+    .t-url { color: #a5f3fc; }
+    .t-prop { color: #f0abfc; }
+    .t-comment { color: #334155; font-style: italic; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: rgba(53, 182, 255, 0.08);
+      border: 1px solid rgba(53, 182, 255, 0.25);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: 0.4px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(8px);
+      z-index: 2;
+    }
+    .copy-btn:hover {
+      background: rgba(53, 182, 255, 0.18);
+      border-color: rgba(53, 182, 255, 0.6);
+      color: #fff;
+    }
+    .copy-btn.copied {
+      background: rgba(0, 255, 163, 0.12);
+      border-color: rgba(0, 255, 163, 0.4);
+      color: var(--success);
+    }
+
+    .response-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    @media (max-width: 640px) {
+      .wrapper { padding: 32px 18px 60px; }
+      .response-grid { grid-template-columns: 1fr; }
+      .endpoint-path { font-size: 16px; }
+      pre { font-size: 12px; padding: 18px; }
+      .header { gap: 12px; }
+      .version-pill { margin-left: 0; }
+    }
+
+    .footer {
+      margin-top: 64px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 12px;
+    }
+    .footer-brand {
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+    }
+    .footer-brand span {
+      background: linear-gradient(135deg, #35b6ff, #00ffa3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+    .footer-copy {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card:nth-child(1) { animation-delay: 0.15s; }
+    .card:nth-child(2) { animation-delay: 0.22s; }
+    .card:nth-child(3) { animation-delay: 0.29s; }
+    .card:nth-child(4) { animation-delay: 0.36s; }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="wrapper">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-badge">
+        <img src="https://iili.io/BDk3VLl.jpg" alt="SAFEORA Logo">
+      </div>
+      <div class="header-text">
+        <h1>SAFEORA API</h1>
+        <p>// REST · TON Blockchain · Instant Transfers</p>
+      </div>
+      <div class="version-pill">v1.0</div>
+    </div>
+
+    <!-- Endpoint Hero -->
+    <div class="section-label">Core Endpoint</div>
+    <div class="endpoint-hero">
+      <div class="method-row">
+        <span class="method-badge">POST</span>
+        <span class="endpoint-path">/ton/send</span>
+      </div>
+      <p class="endpoint-desc">Transfer TON to any wallet address instantly. Requires a valid API key passed via request headers.</p>
+    </div>
+
+    <!-- Headers -->
+    <div class="section-label">Authentication & Headers</div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="dot"></span> Request Headers</div>
+      </div>
+      <div class="code-wrap">
+        <button class="copy-btn" onclick="handleCopy(this, 'hdr')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy
+        </button>
+        <pre id="hdr"><span class="t-prop">x-api-key</span><span class="t-punct">:</span>      <span class="t-str">YOUR_API_KEY</span>
+<span class="t-prop">Content-Type</span><span class="t-punct">:</span>  <span class="t-str">application/json</span></pre>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="section-label">Request Body</div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="dot"></span> JSON Payload</div>
+      </div>
+      <div class="code-wrap">
+        <button class="copy-btn" onclick="handleCopy(this, 'body')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy
+        </button>
+        <pre id="body"><span class="t-punct">{</span>
+  <span class="t-key">"wallet"</span><span class="t-punct">:</span> <span class="t-str">"UQXXXX..."</span><span class="t-punct">,</span>
+  <span class="t-key">"amount"</span><span class="t-punct">:</span> <span class="t-str">"0.05"</span>
+<span class="t-punct">}</span></pre>
+      </div>
+    </div>
+
+    <!-- SAFEORA Example -->
+    <div class="section-label">SAFEORA Code Example</div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="dot purple"></span> SAFEORA Script</div>
+      </div>
+      <div class="code-wrap">
+        <button class="copy-btn" onclick="handleCopy(this, 'tbl')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy
+        </button>
+        <pre id="tbl"><span class="t-meth">HTTP</span><span class="t-punct">.</span><span class="t-meth">post</span><span class="t-punct">({</span>
+
+  <span class="t-prop">url</span><span class="t-punct">:</span>
+    <span class="t-str">"https://tbl-earn-production.up.railway.app/ton/send"</span><span class="t-punct">,</span>
+
+  <span class="t-prop">headers</span><span class="t-punct">: {</span>
+    <span class="t-key">"x-api-key"</span><span class="t-punct">:</span>      <span class="t-str">"API_KEY"</span><span class="t-punct">,</span>
+    <span class="t-key">"Content-Type"</span><span class="t-punct">:</span>  <span class="t-str">"application/json"</span>
+  <span class="t-punct">},</span>
+
+  <span class="t-prop">body</span><span class="t-punct">: {</span>
+    <span class="t-key">wallet</span><span class="t-punct">:</span>  <span class="t-str">"UQXXXX..."</span><span class="t-punct">,</span>
+    <span class="t-key">amount</span><span class="t-punct">:</span>  <span class="t-str">"0.05"</span>
+  <span class="t-punct">},</span>
+
+  <span class="t-prop">success</span><span class="t-punct">:</span> <span class="t-str">"/done"</span><span class="t-punct">,</span>
+  <span class="t-prop">error</span><span class="t-punct">:</span>   <span class="t-str">"/failed"</span>
+
+<span class="t-punct">})</span></pre>
+      </div>
+    </div>
+
+    <!-- Responses -->
+    <div class="section-label">Responses</div>
+    <div class="response-grid">
+      <div class="card" style="margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title"><span class="dot green"></span> 200 Success</div>
+        </div>
+        <div class="code-wrap">
+          <button class="copy-btn" onclick="handleCopy(this, 'succ')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+          <pre id="succ"><span class="t-punct">{</span>
+  <span class="t-key">"success"</span><span class="t-punct">:</span>  <span class="t-bool">true</span><span class="t-punct">,</span>
+  <span class="t-key">"tx_hash"</span><span class="t-punct">:</span>  <span class="t-str">"TON_TX..."</span>
+<span class="t-punct">}</span></pre>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title"><span class="dot red"></span> 4xx Error</div>
+        </div>
+        <div class="code-wrap">
+          <button class="copy-btn" onclick="handleCopy(this, 'err')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+          <pre id="err"><span class="t-punct">{</span>
+  <span class="t-key">"success"</span><span class="t-punct">:</span>  <span class="t-bool">false</span><span class="t-punct">,</span>
+  <span class="t-key">"error"</span><span class="t-punct">:</span>    <span class="t-str">"Insufficient..."</span>
+<span class="t-punct">}</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-brand"><span>SAFEORA</span> API Documentation</div>
+      <div class="footer-copy">© 2026 — All rights reserved</div>
+    </div>
+  </div>
+
+  <script>
+    function handleCopy(btn, id) {
+      const pre = document.getElementById(id);
+      if (!pre) return;
+      const text = pre.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
+        }, 1800);
+      }).catch(() => {
+        alert('Could not copy text.');
+      });
+    }
+  </script>
+</body>
+</html>
