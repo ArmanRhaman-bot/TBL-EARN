@@ -13,6 +13,7 @@
     "@ton/crypto": "^3.2.0",
     "@ton/ton": "^15.1.0",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "name": "tbl-earn-v2"
   }
 }
