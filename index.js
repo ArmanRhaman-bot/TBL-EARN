@@ -352,6 +352,16 @@ app.get("/docs", (req, res) => {
 
 })
 
+const path = require("path")
+
+app.get("/doc", (req, res) => {
+
+  res.sendFile(
+    path.join(__dirname, "doc.html")
+  )
+
+})
+
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
