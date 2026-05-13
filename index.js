@@ -168,11 +168,6 @@ app.get("/docs", (req, res) => {
   res.sendFile(path.join(__dirname, "docs.html"))
 })
 
-// Route 2: /doc → doc.html (new test route)
-app.get("/doc", (req, res) => {
-  res.sendFile(path.join(__dirname, "doc.html"))
-})
-
 // ==================== SERVER ====================
 
 const PORT = process.env.PORT || 3000
