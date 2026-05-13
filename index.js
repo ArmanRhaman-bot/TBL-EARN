@@ -1,190 +1,154 @@
 const express = require("express")
 const dotenv = require("dotenv")
-const path = require("path")
 
 dotenv.config()
 
 const app = express()
 app.use(express.json())
 
-// ===== MongoDB =====
-const { MongoClient } = require("mongodb")
+// ================== MEMORY DATABASE ==================
+let users = {}   // userId ভিত্তিক balance
+let apiKeys = {} // apiKey ভিত্তিক userId
 
-let db, users
-
-MongoClient.connect(process.env.MONGO_URL).then(client => {
-  db = client.db("gateway")
-  users = db.collection("users")
-  console.log("MongoDB Connected")
-})
-
-// ===== TON =====
+// ================== TON ==================
 const {
   TonClient,
   WalletContractV4,
   internal,
   toNano,
-  Address,
-  JettonMaster,
-  JettonWallet
+  Address
 } = require("@ton/ton")
 
 const { mnemonicToPrivateKey } = require("@ton/crypto")
 const { getHttpEndpoint } = require("@orbs-network/ton-access")
 
-// ==================== ROUTES ====================
-
-// Root
+// ================== ROOT ==================
 app.get("/", (req, res) => {
-  res.send("TON WITHDRAW API WORKING")
+  res.send("TON API RUNNING (NO DB)")
 })
 
-// ===== CREATE API KEY =====
-const crypto = require("crypto")
+// ================== CREATE API KEY ==================
+app.post("/create", (req, res) => {
+  const userId = req.body.user_id
 
-app.post("/create", async (req, res) => {
-
-  let user_id = req.body.user_id
-
-  if(!user_id){
-    return res.json({ success:false })
+  if (!userId) {
+    return res.json({ success: false, error: "user_id required" })
   }
 
-  let api_key = crypto.randomBytes(16).toString("hex")
+  const apiKey = Math.random().toString(36).substring(2, 15)
 
-  await users.insertOne({
-    user_id,
-    api_key,
-    balance: 0
-  })
+  apiKeys[apiKey] = userId
+
+  users[userId] = users[userId] || { balance: 0 }
 
   return res.json({
-    success:true,
-    api_key
+    success: true,
+    api_key: apiKey
   })
-
 })
 
-// ===== ADD BALANCE (ADMIN USE) =====
-app.post("/add-balance", async (req, res) => {
+// ================== ADD BALANCE ==================
+app.post("/add", (req, res) => {
+  const userId = req.body.user_id
+  const amount = parseFloat(req.body.amount)
 
-  let { api_key, amount } = req.body
+  if (!userId || !amount) {
+    return res.json({ success: false })
+  }
 
-  amount = parseFloat(amount)
+  users[userId] = users[userId] || { balance: 0 }
+  users[userId].balance += amount
 
-  await users.updateOne(
-    { api_key },
-    { $inc: { balance: amount } }
-  )
-
-  return res.json({ success:true })
-
+  return res.json({
+    success: true,
+    balance: users[userId].balance
+  })
 })
 
-// ===== TON SEND (LOW LEVEL — KEEP SAME) =====
-async function sendTON(walletAddress, amount){
+// ================== CHECK BALANCE ==================
+app.post("/balance", (req, res) => {
+  const apiKey = req.headers["x-api-key"]
 
-  const endpoint = await getHttpEndpoint()
-  const client = new TonClient({ endpoint })
+  const userId = apiKeys[apiKey]
 
-  const mnemonic = process.env.MNEMONIC.split(" ")
-  const keyPair = await mnemonicToPrivateKey(mnemonic)
+  if (!userId) {
+    return res.json({ success: false, error: "Invalid API key" })
+  }
 
-  const wallet = WalletContractV4.create({
-    workchain: 0,
-    publicKey: keyPair.publicKey
+  return res.json({
+    success: true,
+    balance: users[userId].balance
   })
+})
 
-  const contract = client.open(wallet)
-
-  const sendAmount = toNano(amount.toString())
-
-  const seqno = await contract.getSeqno()
-
-  await contract.sendTransfer({
-    secretKey: keyPair.secretKey,
-    seqno,
-    messages: [
-      internal({
-        to: walletAddress,
-        value: sendAmount,
-        body: "TON Withdraw"
-      })
-    ]
-  })
-
-  return "https://tonviewer.com/" + wallet.address.toString()
-}
-
-// ===== MAIN WITHDRAW (SMART SYSTEM) =====
-app.post("/withdraw", async (req, res) => {
-
+// ================== WITHDRAW TON ==================
+app.post("/ton/send", async (req, res) => {
   try {
+    const apiKey = req.headers["x-api-key"]
+    const userId = apiKeys[apiKey]
 
-    const api_key = req.headers["x-api-key"]
+    if (!userId) {
+      return res.json({ success: false, error: "Invalid API key" })
+    }
+
     const walletAddress = req.body.wallet
     const amount = parseFloat(req.body.amount)
 
-    if(!api_key || !walletAddress || !amount){
-      return res.json({ success:false, error:"Missing fields" })
+    if (!walletAddress || !amount) {
+      return res.json({ success: false, error: "Invalid input" })
     }
 
-    let user = await users.findOne({ api_key })
-
-    if(!user){
-      return res.json({ success:false, error:"Invalid API key" })
+    // Check balance
+    if (users[userId].balance < amount) {
+      return res.json({ success: false, error: "Not enough balance" })
     }
 
-    if(user.balance < amount){
-      return res.json({ success:false, error:"Insufficient balance" })
-    }
+    // TON SEND
+    const endpoint = await getHttpEndpoint()
+    const client = new TonClient({ endpoint })
 
-    //SEND TON
-    let tx = await sendTON(walletAddress, amount)
+    const mnemonic = process.env.MNEMONIC.split(" ")
+    const keyPair = await mnemonicToPrivateKey(mnemonic)
 
-    //CUT BALANCE
-    await users.updateOne(
-      { api_key },
-      { $inc: { balance: -amount } }
-    )
-
-    return res.json({
-      success:true,
-      tx_hash: tx,
-      balance: user.balance - amount
+    const wallet = WalletContractV4.create({
+      workchain: 0,
+      publicKey: keyPair.publicKey
     })
 
-  } catch(e){
+    const contract = client.open(wallet)
 
-    return res.json({
-      success:false,
-      error:e.message
+    const sendAmount = toNano(amount.toString())
+
+    const seqno = await contract.getSeqno()
+
+    await contract.sendTransfer({
+      secretKey: keyPair.secretKey,
+      seqno,
+      messages: [
+        internal({
+          to: walletAddress,
+          value: sendAmount,
+          body: "Withdraw"
+        })
+      ]
     })
 
+    // deduct balance
+    users[userId].balance -= amount
+
+    return res.json({
+      success: true,
+      balance: users[userId].balance
+    })
+
+  } catch (e) {
+    return res.json({ success: false, error: e.message })
   }
-
 })
 
-// ===== OLD ROUTE (OPTIONAL KEEP) =====
-app.post("/ton/send", async (req, res) => {
-
-  return res.json({
-    success:false,
-    error:"Use /withdraw instead"
-  })
-
-})
-
-// ==================== DOCS ====================
-
-app.get("/docs", (req, res) => {
-  res.sendFile(path.join(__dirname, "docs.html"))
-})
-
-// ==================== SERVER ====================
-
+// ================== SERVER ==================
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
-  console.log("TON API STARTED on port", PORT)
+  console.log("API STARTED:", PORT)
 })
