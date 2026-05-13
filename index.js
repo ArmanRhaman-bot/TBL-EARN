@@ -362,6 +362,10 @@ app.get("/doc", (req, res) => {
 
 })
 
+app.get("/", (req, res) => {
+  res.send("NEW VERSION v.0.2")
+})
+
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
