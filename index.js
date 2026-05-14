@@ -364,6 +364,13 @@ app.get("/admin/users", (req, res) => {
   return res.json({ success: true, total: summary.length, users: summary })
 })
 
+// ==================== DOCS ROUTES ====================
+
+// Route 1: /docs → docs.html
+app.get("/docs", (req, res) => {
+  res.sendFile(path.join(__dirname, "docs.html"))
+})
+
 // ================== SERVER ==================
 const PORT = process.env.PORT || 3000
 
