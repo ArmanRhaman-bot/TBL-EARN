@@ -377,6 +377,179 @@ function scrollToTop(){ window.scrollTo(0,0); }
 setInterval(loadBalance,15000);
 loadBalance();
 </script>
+<!-- ===== DEPOSIT SCREEN ===== -->
+<div id="depositScreen" style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#0f172a;
+z-index:999;
+display:none;
+overflow:auto;
+">
+
+<div style="max-width:480px;margin:auto;padding:20px;color:white;">
+
+<!-- HEADER -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+  <i class="fas fa-arrow-left" onclick="closeDeposit()" style="font-size:20px;cursor:pointer;"></i>
+  <b>Deposit</b>
+  <i class="fas fa-ellipsis-v"></i>
+</div>
+
+<!-- TOKEN -->
+<div style="background:#111827;padding:14px;border-radius:14px;margin-bottom:12px;">
+  <b>Tether (USDT)</b>
+</div>
+
+<!-- NETWORK -->
+<div style="background:#111827;padding:14px;border-radius:14px;margin-bottom:20px;">
+  <b>TON Network</b>
+</div>
+
+<!-- QR -->
+<div style="text-align:center;margin-bottom:15px;">
+  <img id="qrImg" src="" style="width:180px;height:180px;background:white;padding:10px;border-radius:10px;">
+</div>
+
+<!-- ADDRESS -->
+<div style="text-align:center;font-size:12px;word-break:break-all;margin-bottom:10px;" id="depositAddress">
+Loading...
+</div>
+
+<button onclick="copyAddress()" style="
+width:100%;
+padding:12px;
+border:none;
+border-radius:12px;
+background:#3b82f6;
+color:white;
+margin-bottom:15px;
+">
+Copy Address
+</button>
+
+<!-- INFO -->
+<div style="background:#111827;padding:12px;border-radius:12px;font-size:12px;color:#94a3b8;">
+Minimum Receive 0.01 USDT<br><br>
+Send only USDT on TON network.<br>
+Wrong coin = loss
+</div>
+
+</div>
+</div>
+<!-- ===== WITHDRAW SCREEN ===== -->
+<div id="withdrawScreen" style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#0f172a;
+z-index:999;
+display:none;
+">
+
+<div style="max-width:480px;margin:auto;padding:20px;color:white;">
+
+<!-- HEADER -->
+<div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+  <i class="fas fa-arrow-left" onclick="closeWithdraw()"></i>
+  <b>Withdraw TON</b>
+  <i class="fas fa-cog"></i>
+</div>
+
+<input id="withdrawAddress" placeholder="Enter TON Address" style="
+width:100%;
+padding:12px;
+margin-bottom:10px;
+border-radius:10px;
+border:none;
+background:#111827;
+color:white;
+">
+
+<input id="withdrawAmount" placeholder="Amount (TON)" type="number" style="
+width:100%;
+padding:12px;
+margin-bottom:15px;
+border-radius:10px;
+border:none;
+background:#111827;
+color:white;
+">
+
+<button onclick="submitWithdraw()" style="
+width:100%;
+padding:14px;
+background:#22c55e;
+border:none;
+border-radius:12px;
+color:white;
+font-weight:bold;
+">
+Send TON
+</button>
+
+</div>
+</div>
+// OPEN FULL UI
+function openDepositModal(){
+  document.getElementById("depositScreen").style.display = "block";
+  loadDepositUI();
+}
+
+function closeDeposit(){
+  document.getElementById("depositScreen").style.display = "none";
+}
+
+function openWithdrawModal(){
+  document.getElementById("withdrawScreen").style.display = "block";
+}
+
+function closeWithdraw(){
+  document.getElementById("withdrawScreen").style.display = "none";
+}
+
+// LOAD DEPOSIT DATA
+async function loadDepositUI(){
+  const info = await getDepositInfo();
+  if(!info) return;
+
+  document.getElementById("depositAddress").innerText = info.deposit_address;
+
+  // QR GENERATE
+  document.getElementById("qrImg").src =
+    "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + info.deposit_address;
+}
+
+// COPY
+function copyAddress(){
+  let text = document.getElementById("depositAddress").innerText;
+  navigator.clipboard.writeText(text);
+  alert("Copied!");
+}
+
+// WITHDRAW
+async function submitWithdraw(){
+  let address = document.getElementById("withdrawAddress").value;
+  let amount = document.getElementById("withdrawAmount").value;
+
+  if(!address || !amount){
+    alert("Fill all fields");
+    return;
+  }
+
+  let res = await withdrawTon(amount,address);
+
+  if(res){
+    closeWithdraw();
+  }
+}
+
 
 </body>
 </html>
+
