@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TBL Wallet</title>
+  <style>
+    body {
+      background: #0f172a;
+      color: white;
+      font-family: Arial;
+      padding: 20px;
+    }
+    .card {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+      background: #3b82f6;
+      border: none;
+      color: white;
+      border-radius: 5px;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="top">
+  <h2>💼 TBL Wallet</h2>
+  <button onclick="openSettings()">⚙️</button>
+</div>
+
+<div class="card">
+  <h3>TON</h3>
+  <p id="ton_balance">0 TON</p>
+</div>
+
+<div class="card">
+  <h3>USDT</h3>
+  <p>0 USDT</p>
+</div>
+
+<div class="card">
+  <button onclick="createApi()">🔑 Create API Key</button>
+  <p id="api_key"></p>
+</div>
+
+<script>
+
+let API_KEY = localStorage.getItem("api_key")
+
+async function createApi() {
+  let user_id = prompt("Enter your user ID")
+
+  let res = await fetch("/api/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id })
+  })
+
+  let data = await res.json()
+
+  if (data.success) {
+    API_KEY = data.api_key
+    localStorage.setItem("api_key", API_KEY)
+
+    document.getElementById("api_key").innerText = "API: " + API_KEY
+    alert("API Created")
+  }
+}
+
+async function loadBalance() {
+  if (!API_KEY) return
+
+  let res = await fetch("/api/balance", {
+    headers: {
+      "x-api-key": API_KEY
+    }
+  })
+
+  let data = await res.json()
+
+  if (data.success) {
+    document.getElementById("ton_balance").innerText =
+      data.balance + " TON"
+  }
+}
+
+loadBalance()
+
+</script>
+
+</body>
+</html>
