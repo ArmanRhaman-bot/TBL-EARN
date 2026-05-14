@@ -1,328 +1,382 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>SAFEORA • Multi-Chain Wallet</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #0a0c12;
-      font-family: 'Inter', sans-serif;
-      color: #ffffff;
-      padding-bottom: 80px;
-    }
-    .app-container { max-width: 500px; margin: 0 auto; padding: 20px 16px; }
-    
-    /* header */
-    .wallet-header { margin-bottom: 24px; }
-    .logo-area { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-    .logo-icon {
-      background: linear-gradient(135deg, #3b82f6, #06b6d4);
-      width: 40px; height: 40px;
-      border-radius: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
-    .logo-text h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
-    .logo-text p { font-size: 0.7rem; color: #6b7280; }
-    
-    /* total balance card */
-    .total-card {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      border-radius: 32px;
-      padding: 24px;
-      margin-bottom: 24px;
-      border: 1px solid #334155;
-      text-align: center;
-    }
-    .total-label { font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px; }
-    .total-amount { font-size: 3rem; font-weight: 800; letter-spacing: -1px; }
-    .total-btc { font-size: 0.8rem; color: #64748b; margin-top: 6px; }
-    .action-buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-      justify-content: center;
-    }
-    .action-btn {
-      background: #334155;
-      border: none;
-      padding: 10px 24px;
-      border-radius: 40px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-    }
-    .action-btn.deposit { background: #3b82f6; }
-    .action-btn.withdraw { background: #ef4444; }
-    .action-btn.history { background: #10b981; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAFEORA Wallet</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0a0c12;
+  font-family:'Inter',sans-serif;
+  color:#fff;
+}
+
+.container{
+  max-width:480px;
+  margin:auto;
+  padding:20px 15px 90px;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.logo{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.logo-icon{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#3b82f6,#06b6d4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.logo-text h2{
+  font-size:20px;
+}
+
+.logo-text p{
+  font-size:11px;
+  color:#6b7280;
+}
+
+/* TOP RIGHT ICONS */
+.top-icons{
+  display:flex;
+  gap:10px;
+}
+
+.icon-btn{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:#111827;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+/* TOTAL CARD */
+.card{
+  background:linear-gradient(135deg,#1e293b,#0f172a);
+  border-radius:25px;
+  padding:20px;
+  border:1px solid #1f2a44;
+  margin-bottom:20px;
+}
+
+.balance-title{
+  font-size:13px;
+  color:#94a3b8;
+}
+
+.balance{
+  font-size:32px;
+  font-weight:800;
+  margin:8px 0;
+}
+
+.btc{
+  font-size:12px;
+  color:#64748b;
+}
+
+/* ACTION BUTTONS FIX */
+.actions{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:15px;
+}
+
+.action{
+  background:#111827;
+  padding:12px 8px;
+  border-radius:14px;
+  text-align:center;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.action i{
+  display:block;
+  font-size:18px;
+  margin-bottom:5px;
+}
+
+/* COLORS */
+.deposit{color:#22c55e;}
+.withdraw{color:#3b82f6;}
+.history{color:#a855f7;}
+/* ASSETS */
+.assets{
+  margin-top:10px;
+}
+
+.asset{
+  background:#111827;
+  border-radius:16px;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.asset-left{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.asset-icon{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#1e293b;
+}
+
+.asset-name{
+  font-weight:600;
+}
+
+.asset-symbol{
+  font-size:11px;
+  color:#6b7280;
+}
+
+.asset-right{
+  text-align:right;
+}
+
+/* API BOX */
+.api-box{
+  background:#111827;
+  border-radius:18px;
+  padding:15px;
+  margin-top:15px;
+  border:1px solid #1f2a44;
+}
+
+.api-btn{
+  background:#3b82f6;
+  padding:8px 14px;
+  border:none;
+  border-radius:20px;
+  color:#fff;
+}
+
+/* BOTTOM NAV FIX */
+.nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  max-width:480px;
+  margin:auto;
+  display:flex;
+  justify-content:space-around;
+  background:#0f172a;
+  border-top:1px solid #1f2a44;
+  padding:10px 0;
+}
+
+.nav button{
+  background:none;
+  border:none;
+  color:#6b7280;
+  font-size:12px;
+}
+
+.nav i{
+  display:block;
+  font-size:18px;
+}
+</style>
 </head>
+
 <body>
-<div class="app-container">
+<div class="container">
+
 <!-- HEADER -->
-<div class="wallet-header">
-  <div class="logo-area">
+<div class="header">
+  <div class="logo">
     <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
     <div class="logo-text">
-      <h1>SAFEORA</h1>
-      <p>Secure • Decentral • Vault</p>
+      <h2>SAFEORA</h2>
+      <p>Secure • Vault</p>
+    </div>
+  </div>
+
+  <!-- TOP RIGHT -->
+  <div class="top-icons">
+    <div class="icon-btn" onclick="window.open('/docs')">
+      <i class="fas fa-book"></i>
+    </div>
+    <div class="icon-btn" onclick="openSettings()">
+      <i class="fas fa-sliders-h"></i>
     </div>
   </div>
 </div>
 
-<!-- TOTAL BALANCE CARD -->
-<div class="total-card">
-  <div class="total-label">Total Balance</div>
-  <div class="total-amount" id="totalUsd">$0.00</div>
-  <div class="total-btc" id="totalBtc">≈ 0.000000 BTC</div>
-  <div class="action-buttons">
-    <button class="action-btn deposit" onclick="openDepositModal()"><i class="fas fa-arrow-down"></i> Deposit</button>
-    <button class="action-btn withdraw" onclick="openWithdrawModal()"><i class="fas fa-arrow-up"></i> Withdraw</button>
-    <button class="action-btn history" onclick="openHistoryModal()"><i class="fas fa-clock"></i> History</button>
-  </div>
-</div>
+<!-- BALANCE -->
+<div class="card">
+  <div class="balance-title">Total Balance</div>
+  <div class="balance" id="totalUsd">$0.00</div>
+  <div class="btc" id="totalBtc">≈ 0 BTC</div>
 
-<!-- ASSETS HEADER -->
-<div style="display: flex; justify-content: space-between; align-items: center; margin: 16px 0 12px;">
-  <h3 style="font-size: 1.1rem;"><i class="fas fa-coins"></i> Assets</h3>
-  <button onclick="openApiModal()" style="background: none; border: none; color: #3b82f6; font-size: 0.8rem; cursor: pointer;"><i class="fas fa-key"></i> Manage</button>
-</div>
-<style>
-  .asset-item {
-    background: #111827;
-    border-radius: 20px;
-    padding: 14px 18px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid #1f2a44;
-    transition: 0.2s;
-  }
-  .asset-left { display: flex; align-items: center; gap: 12px; }
-  .asset-icon { width: 44px; height: 44px; background: #1e293b; border-radius: 30px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
-  .asset-name { font-weight: 600; }
-  .asset-symbol { font-size: 0.7rem; color: #6b7280; }
-  .asset-right { text-align: right; }
-  .asset-balance { font-weight: 700; }
-  .asset-usd { font-size: 0.7rem; color: #6b7280; }
-</style>
-
-<!-- BTC -->
-<div class="asset-item">
-  <div class="asset-left"><div class="asset-icon" style="color:#f7931a;"><i class="fab fa-bitcoin"></i></div><div><div class="asset-name">Bitcoin</div><div class="asset-symbol">BTC</div></div></div>
-  <div class="asset-right"><div class="asset-balance" id="btcBalance">0.000000</div><div class="asset-usd" id="btcUsd">$0.00</div></div>
-</div>
-
-<!-- ETH -->
-<div class="asset-item">
-  <div class="asset-left"><div class="asset-icon" style="color:#627eea;"><i class="fab fa-ethereum"></i></div><div><div class="asset-name">Ethereum</div><div class="asset-symbol">ETH</div></div></div>
-  <div class="asset-right"><div class="asset-balance" id="ethBalance">0.000000</div><div class="asset-usd" id="ethUsd">$0.00</div></div>
-</div>
-
-<!-- USDT -->
-<div class="asset-item">
-  <div class="asset-left"><div class="asset-icon" style="color:#22c55e;"><i class="fas fa-dollar-sign"></i></div><div><div class="asset-name">Tether</div><div class="asset-symbol">USDT (TRC-20)</div></div></div>
-  <div class="asset-right"><div class="asset-balance" id="usdtBalance">0.00</div><div class="asset-usd" id="usdtUsd">$0.00</div></div>
-</div>
-
-<!-- TON -->
-<div class="asset-item">
-  <div class="asset-left"><div class="asset-icon" style="color:#3b82f6;"><i class="fab fa-telegram-plane"></i></div><div><div class="asset-name">TON Coin</div><div class="asset-symbol">TON</div></div></div>
-  <div class="asset-right"><div class="asset-balance" id="tonBalance">0.000000</div><div class="asset-usd" id="tonUsd">$0.00</div></div>
-</div>
-  <!-- API ACCESS SECTION -->
-  <div style="background: #111827; border-radius: 24px; padding: 16px; margin: 20px 0; border: 1px solid #1f2a44;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <div><i class="fas fa-key" style="color:#3b82f6;"></i> <strong>API Access</strong><div style="font-size: 0.7rem; color:#6b7280;">Manage your API keys</div></div>
-      <button onclick="createApiKey()" id="genApiBtn" style="background:#3b82f6; border:none; padding: 8px 16px; border-radius: 40px; color:white; cursor:pointer;"><i class="fas fa-plus"></i> Generate</button>
+  <!-- FIXED BUTTONS -->
+  <div class="actions">
+    <div class="action deposit" onclick="openDepositModal()">
+      <i class="fas fa-arrow-down"></i>Deposit
     </div>
-    <div id="apiKeyDisplay" style="margin-top: 12px; font-size: 0.7rem; color: #60a5fa; word-break: break-all;"></div>
+    <div class="action withdraw" onclick="openWithdrawModal()">
+      <i class="fas fa-arrow-up"></i>Withdraw
+    </div>
+    <div class="action history" onclick="openHistoryModal()">
+      <i class="fas fa-clock"></i>History
+    </div>
   </div>
+</div>
 
-  <!-- BOTTOM NAVIGATION -->
-  <div style="position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid #1f2a44; padding: 12px 20px; max-width: 500px; margin: 0 auto; display: flex; justify-content: space-around;">
-    <button onclick="scrollToTop()" style="background:none; border:none; color:#60a5fa; cursor:pointer;"><i class="fas fa-wallet"></i> Wallet</button>
-    <button onclick="openDepositModal()" style="background:none; border:none; color:#6b7280; cursor:pointer;"><i class="fas fa-arrow-down"></i> Deposit</button>
-    <button onclick="openWithdrawModal()" style="background:none; border:none; color:#6b7280; cursor:pointer;"><i class="fas fa-arrow-up"></i> Withdraw</button>
-    <button onclick="openHistoryModal()" style="background:none; border:none; color:#6b7280; cursor:pointer;"><i class="fas fa-clock"></i> History</button>
-    <button onclick="openSettings()" style="background:none; border:none; color:#6b7280; cursor:pointer;"><i class="fas fa-cog"></i> Settings</button>
+<!-- ASSETS -->
+<div class="assets">
+
+<div class="asset">
+  <div class="asset-left">
+    <div class="asset-icon"><i class="fab fa-bitcoin" style="color:#f7931a;"></i></div>
+    <div>
+      <div class="asset-name">Bitcoin</div>
+      <div class="asset-symbol">BTC</div>
+    </div>
   </div>
+  <div class="asset-right" id="btcBalance">0</div>
+</div>
+
+<div class="asset">
+  <div class="asset-left">
+    <div class="asset-icon"><i class="fab fa-ethereum" style="color:#627eea;"></i></div>
+    <div>
+      <div class="asset-name">Ethereum</div>
+      <div class="asset-symbol">ETH</div>
+    </div>
+  </div>
+  <div class="asset-right" id="ethBalance">0</div>
+</div>
+
+<div class="asset">
+  <div class="asset-left">
+    <div class="asset-icon"><i class="fas fa-dollar-sign" style="color:#22c55e;"></i></div>
+    <div>
+      <div class="asset-name">USDT</div>
+      <div class="asset-symbol">TRC20</div>
+    </div>
+  </div>
+  <div class="asset-right" id="usdtBalance">0</div>
+</div>
+
+<div class="asset">
+  <div class="asset-left">
+    <div class="asset-icon"><i class="fab fa-telegram-plane" style="color:#3b82f6;"></i></div>
+    <div>
+      <div class="asset-name">TON</div>
+      <div class="asset-symbol">TON</div>
+    </div>
+  </div>
+  <div class="asset-right" id="tonBalance">0</div>
+</div>
+
+</div>
+<!-- API BOX -->
+<div class="api-box">
+  <b>API Access</b>
+  <br><small>Manage API Key</small><br><br>
+  <button class="api-btn" onclick="createApiKey()">Generate</button>
+  <div id="apiKeyDisplay"></div>
+</div>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button onclick="scrollToTop()"><i class="fas fa-wallet"></i>Wallet</button>
+  <button onclick="openDepositModal()"><i class="fas fa-arrow-down"></i>Deposit</button>
+  <button onclick="openWithdrawModal()"><i class="fas fa-arrow-up"></i>Withdraw</button>
+  <button onclick="openHistoryModal()"><i class="fas fa-clock"></i>History</button>
+  <button onclick="openSettings()"><i class="fas fa-cog"></i>Settings</button>
 </div>
 
 <script>
-// ========== SAFEORA FULL API INTEGRATION ==========
 const API_BASE = "https://tbl-earn-production.up.railway.app";
-let API_KEY = localStorage.getItem("safeora_api_key") || null;
+let API_KEY = localStorage.getItem("safeora_api_key");
 
-// Prices (mock for USD calculation)
-let prices = { BTC: 65000, ETH: 3200, USDT: 1, TON: 5.2 };
+async function createApiKey(){
+  let id = prompt("Enter User ID");
+  if(!id) return;
 
-async function createApiKey() {
-  let userId = prompt("Enter User ID to generate API key + unique memo");
-  if (!userId) return;
-  const btn = document.getElementById("genApiBtn");
-  btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
-  try {
-    const res = await fetch(`${API_BASE}/api/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId })
-    });
-    const data = await res.json();
-    if (data.success && data.api_key) {
-      API_KEY = data.api_key;
-      localStorage.setItem("safeora_api_key", API_KEY);
-      document.getElementById("apiKeyDisplay").innerHTML = `<i class="fas fa-check-circle"></i> Key: ${data.api_key.substring(0, 16)}... | Memo: ${data.memo || 'N/A'}`;
-      await loadAllBalances();
-    } else throw new Error("Registration failed");
-  } catch(err) { alert("Error: " + err.message); }
-  btn.innerHTML = '<i class="fas fa-plus"></i> Generate';
-}
-
-async function getDepositInfo() {
-  if (!API_KEY) { alert("Generate API key first"); return null; }
-  try {
-    const res = await fetch(`${API_BASE}/api/deposit/info`, {
-      headers: { "x-api-key": API_KEY }
-    });
-    const data = await res.json();
-    if (data.success) return data;
-    throw new Error("Failed");
-  } catch(err) { alert("Deposit info error: " + err.message); return null; }
-}
-
-async function verifyDeposit() {
-  if (!API_KEY) return;
-  await fetch(`${API_BASE}/api/deposit/verify`, {
-    method: "POST",
-    headers: { "x-api-key": API_KEY, "Content-Type": "application/json" }
+  let res = await fetch(API_BASE + "/api/register",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({user_id:id})
   });
-  await loadAllBalances();
-}
-async function loadAllBalances() {
-  if (!API_KEY) return;
-  try {
-    const res = await fetch(`${API_BASE}/api/balance`, {
-      headers: { "x-api-key": API_KEY }
-    });
-    const data = await res.json();
-    if (data.success) {
-      // Assuming backend returns { ton, usdt, btc, eth }
-      let btc = data.btc || 0;
-      let eth = data.eth || 0;
-      let usdt = data.usdt || 0;
-      let ton = data.ton || 0;
-      
-      document.getElementById("btcBalance").innerText = btc.toFixed(8);
-      document.getElementById("ethBalance").innerText = eth.toFixed(8);
-      document.getElementById("usdtBalance").innerText = usdt.toFixed(2);
-      document.getElementById("tonBalance").innerText = ton.toFixed(8);
-      
-      let totalUsd = (btc * prices.BTC) + (eth * prices.ETH) + (usdt * 1) + (ton * prices.TON);
-      document.getElementById("totalUsd").innerText = "$" + totalUsd.toFixed(2);
-      document.getElementById("totalBtc").innerText = "≈ " + (totalUsd / prices.BTC).toFixed(8) + " BTC";
-      
-      document.getElementById("btcUsd").innerText = "$" + (btc * prices.BTC).toFixed(2);
-      document.getElementById("ethUsd").innerText = "$" + (eth * prices.ETH).toFixed(2);
-      document.getElementById("usdtUsd").innerText = "$" + usdt.toFixed(2);
-      document.getElementById("tonUsd").innerText = "$" + (ton * prices.TON).toFixed(2);
-    }
-  } catch(e) { console.log(e); }
-}
 
-async function withdrawTon(amount, address) {
-  if (!API_KEY) { alert("No API key"); return false; }
-  try {
-    const res = await fetch(`${API_BASE}/api/withdraw`, {
-      method: "POST",
-      headers: { "x-api-key": API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: parseFloat(amount), address })
-    });
-    const data = await res.json();
-    if (data.success) { alert("Withdraw successful!"); await loadAllBalances(); return true; }
-    else throw new Error(data.message);
-  } catch(err) { alert("Withdraw failed: " + err.message); return false; }
-}
+  let data = await res.json();
 
-async function getTransactions() {
-  if (!API_KEY) { alert("Generate API key first"); return []; }
-  try {
-    const res = await fetch(`${API_BASE}/api/transactions`, {
-      headers: { "x-api-key": API_KEY }
-    });
-    const data = await res.json();
-    return data.success ? data.transactions : [];
-  } catch(e) { return []; }
-}
-function openDepositModal() {
-  getDepositInfo().then(info => {
-    let msg = info ? `Address: ${info.address}\nMemo: ${info.memo}\n\nSend only USDT/TON to this address` : "Failed to get deposit info";
-    alert(msg);
-  });
-}
-
-function openWithdrawModal() {
-  let amount = prompt("Enter TON amount to withdraw:");
-  if (!amount) return;
-  let address = prompt("Enter destination TON address:");
-  if (!address) return;
-  withdrawTon(amount, address);
-}
-
-async function openHistoryModal() {
-  let txs = await getTransactions();
-  if (!txs.length) { alert("No transactions found"); return; }
-  let historyText = txs.map(t => `${t.type} ${t.amount} TON - ${t.status} (${t.date})`).join("\n");
-  alert("Transaction History:\n" + historyText);
-}
-
-function openApiModal() {
-  if (API_KEY) {
-    alert(`Your API Key: ${API_KEY}\n\nUse with: ${API_BASE}/api/...`);
-  } else {
-    alert("No API key. Click 'Generate' in API Access section.");
+  if(data.success){
+    API_KEY = data.api_key;
+    localStorage.setItem("safeora_api_key",API_KEY);
+    document.getElementById("apiKeyDisplay").innerText = API_KEY;
   }
 }
 
-function openSettings() {
-  alert("⚙️ SAFEORA Settings\n\n• API Base: " + API_BASE + "\n• Key: " + (API_KEY ? "✅ Set" : "❌ Not set") + "\n\nRefresh balances every 30s");
+async function loadBalance(){
+  if(!API_KEY) return;
+
+  let res = await fetch(API_BASE + "/api/balance",{
+    headers:{"x-api-key":API_KEY}
+  });
+
+  let d = await res.json();
+
+  if(d.success){
+    document.getElementById("tonBalance").innerText = d.balance;
+    document.getElementById("totalUsd").innerText = "$"+d.balance;
+  }
 }
 
-function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function openDepositModal(){ alert("Deposit system"); }
+function openWithdrawModal(){ alert("Withdraw system"); }
+function openHistoryModal(){ alert("History system"); }
+function openSettings(){ alert("Settings"); }
+function scrollToTop(){ window.scrollTo(0,0); }
 
-// Auto refresh every 30 sec
-setInterval(() => { if(API_KEY) loadAllBalances(); }, 30000);
-
-window.addEventListener("DOMContentLoaded", () => {
-  if(API_KEY) { loadAllBalances(); document.getElementById("apiKeyDisplay").innerHTML = `<i class="fas fa-check-circle"></i> API Key active`; }
-});
-  // Expose functions globally
-  window.createApiKey = createApiKey;
-  window.openDepositModal = openDepositModal;
-  window.openWithdrawModal = openWithdrawModal;
-  window.openHistoryModal = openHistoryModal;
-  window.openApiModal = openApiModal;
-  window.openSettings = openSettings;
-  window.scrollToTop = scrollToTop;
+setInterval(loadBalance,15000);
+loadBalance();
 </script>
-
-<style>
-  button { cursor: pointer; transition: 0.2s; }
-  button:active { transform: scale(0.97); }
-  .action-btn, .btn-primary { transition: 0.2s; }
-  body { padding-bottom: 70px; }
-</style>
 
 </body>
 </html>
