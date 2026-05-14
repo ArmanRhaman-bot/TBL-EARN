@@ -371,6 +371,10 @@ app.get("/docs", (req, res) => {
   res.sendFile(path.join(__dirname, "docs.html"))
 })
 
+app.get("/wallet", (req, res) => {
+  res.sendFile(path.join(__dirname, "wallet.html"))
+})
+
 // ================== SERVER ==================
 const PORT = process.env.PORT || 3000
 
