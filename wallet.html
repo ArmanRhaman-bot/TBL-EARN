@@ -1,555 +1,198 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SAFEORA Wallet</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
+body{background:#0a0c12;color:white;font-family:sans-serif;margin:0}
+.container{max-width:480px;margin:auto;padding:15px}
 
-body{
-  background:#0a0c12;
-  font-family:'Inter',sans-serif;
-  color:#fff;
-}
+/* CARD */
+.card{background:#111827;padding:20px;border-radius:20px;margin-bottom:15px;text-align:center}
+.balance{font-size:30px;font-weight:bold}
 
-.container{
-  max-width:480px;
-  margin:auto;
-  padding:20px 15px 90px;
-}
+/* BUTTON GRID FIX */
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:15px}
+.action{background:#1f2937;padding:12px;border-radius:12px}
 
-/* HEADER */
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
+/* ASSET */
+.asset{display:flex;justify-content:space-between;background:#111827;padding:12px;border-radius:12px;margin-bottom:10px}
 
-.logo{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.logo-icon{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  background:linear-gradient(135deg,#3b82f6,#06b6d4);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.logo-text h2{
-  font-size:20px;
-}
-
-.logo-text p{
-  font-size:11px;
-  color:#6b7280;
-}
-
-/* TOP RIGHT ICONS */
-.top-icons{
-  display:flex;
-  gap:10px;
-}
-
-.icon-btn{
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  background:#111827;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-}
-
-/* TOTAL CARD */
-.card{
-  background:linear-gradient(135deg,#1e293b,#0f172a);
-  border-radius:25px;
-  padding:20px;
-  border:1px solid #1f2a44;
-  margin-bottom:20px;
-}
-
-.balance-title{
-  font-size:13px;
-  color:#94a3b8;
-}
-
-.balance{
-  font-size:32px;
-  font-weight:800;
-  margin:8px 0;
-}
-
-.btc{
-  font-size:12px;
-  color:#64748b;
-}
-
-/* ACTION BUTTONS FIX */
-.actions{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-top:15px;
-}
-
-.action{
-  background:#111827;
-  padding:12px 8px;
-  border-radius:14px;
-  text-align:center;
-  cursor:pointer;
-  font-size:13px;
-}
-
-.action i{
-  display:block;
-  font-size:18px;
-  margin-bottom:5px;
-}
-
-/* COLORS */
-.deposit{color:#22c55e;}
-.withdraw{color:#3b82f6;}
-.history{color:#a855f7;}
-/* ASSETS */
-.assets{
-  margin-top:10px;
-}
-
-.asset{
-  background:#111827;
-  border-radius:16px;
-  padding:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:10px;
-}
-
-.asset-left{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.asset-icon{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#1e293b;
-}
-
-.asset-name{
-  font-weight:600;
-}
-
-.asset-symbol{
-  font-size:11px;
-  color:#6b7280;
-}
-
-.asset-right{
-  text-align:right;
-}
-
-/* API BOX */
-.api-box{
-  background:#111827;
-  border-radius:18px;
-  padding:15px;
-  margin-top:15px;
-  border:1px solid #1f2a44;
-}
-
-.api-btn{
-  background:#3b82f6;
-  padding:8px 14px;
-  border:none;
-  border-radius:20px;
-  color:#fff;
-}
-
-/* BOTTOM NAV FIX */
-.nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  max-width:480px;
-  margin:auto;
-  display:flex;
-  justify-content:space-around;
-  background:#0f172a;
-  border-top:1px solid #1f2a44;
-  padding:10px 0;
-}
-
-.nav button{
-  background:none;
-  border:none;
-  color:#6b7280;
-  font-size:12px;
-}
-
-.nav i{
-  display:block;
-  font-size:18px;
-}
+/* FULL SCREEN MODAL */
+.screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#0f172a;display:none;z-index:999}
+.screen-box{max-width:480px;margin:auto;padding:20px}
 </style>
 </head>
 
 <body>
+
 <div class="container">
 
-<!-- HEADER -->
-<div class="header">
-  <div class="logo">
-    <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
-    <div class="logo-text">
-      <h2>SAFEORA</h2>
-      <p>Secure • Vault • Fast</p>
-    </div>
-  </div>
+<h2>SAFEORA</h2>
 
-  <!-- TOP RIGHT -->
-  <div class="top-icons">
-    <div class="icon-btn" onclick="window.open('/docs')">
-      <i class="fas fa-book"></i>
-    </div>
-    <div class="icon-btn" onclick="openSettings()">
-      <i class="fas fa-sliders-h"></i>
-    </div>
-  </div>
-</div>
-
-<!-- BALANCE -->
 <div class="card">
-  <div class="balance-title">Total Balance</div>
-  <div class="balance" id="totalUsd">$0.00</div>
-  <div class="btc" id="totalBtc">≈ 0 BTC</div>
+<div>Total Balance</div>
+<div class="balance" id="totalUsd">$0</div>
 
-  <!-- FIXED BUTTONS -->
-  <div class="actions">
-    <div class="action deposit" onclick="openDepositModal()">
-      <i class="fas fa-arrow-down"></i>Deposit
-    </div>
-    <div class="action withdraw" onclick="openWithdrawModal()">
-      <i class="fas fa-arrow-up"></i>Withdraw
-    </div>
-    <div class="action history" onclick="openHistoryModal()">
-      <i class="fas fa-clock"></i>History
-    </div>
-  </div>
+<div class="actions">
+<div class="action" onclick="openDeposit()">Deposit</div>
+<div class="action" onclick="openWithdraw()">Withdraw</div>
+<div class="action" onclick="loadHistory()">History</div>
+</div>
 </div>
 
 <!-- ASSETS -->
-<div class="assets">
-
 <div class="asset">
-  <div class="asset-left">
-    <div class="asset-icon"><i class="fab fa-bitcoin" style="color:#f7931a;"></i></div>
-    <div>
-      <div class="asset-name">Bitcoin</div>
-      <div class="asset-symbol">BTC</div>
-    </div>
-  </div>
-  <div class="asset-right" id="btcBalance">0</div>
+<div>TON</div>
+<div>
+<div id="tonBalance">0</div>
+<div id="tonUsd">$0</div>
+</div>
 </div>
 
 <div class="asset">
-  <div class="asset-left">
-    <div class="asset-icon"><i class="fab fa-ethereum" style="color:#627eea;"></i></div>
-    <div>
-      <div class="asset-name">Ethereum</div>
-      <div class="asset-symbol">ETH</div>
-    </div>
-  </div>
-  <div class="asset-right" id="ethBalance">0</div>
+<div>USDT</div>
+<div>
+<div id="usdtBalance">0</div>
+<div id="usdtUsd">$0</div>
+</div>
 </div>
 
-<div class="asset">
-  <div class="asset-left">
-    <div class="asset-icon"><i class="fas fa-dollar-sign" style="color:#22c55e;"></i></div>
-    <div>
-      <div class="asset-name">USDT</div>
-      <div class="asset-symbol">TRC20</div>
-    </div>
-  </div>
-  <div class="asset-right" id="usdtBalance">0</div>
-</div>
-
-<div class="asset">
-  <div class="asset-left">
-    <div class="asset-icon"><i class="fab fa-telegram-plane" style="color:#3b82f6;"></i></div>
-    <div>
-      <div class="asset-name">TON</div>
-      <div class="asset-symbol">TON</div>
-    </div>
-  </div>
-  <div class="asset-right" id="tonBalance">0</div>
-</div>
-
-</div>
-<!-- API BOX -->
-<div class="api-box">
-  <b>API Access</b>
-  <br><small>Manage API Key</small><br><br>
-  <button class="api-btn" onclick="createApiKey()">Generate</button>
-  <div id="apiKeyDisplay"></div>
-</div>
+<!-- API -->
+<button onclick="createApi()">Generate API</button>
+<div id="apiKey"></div>
 
 </div>
 
-<!-- NAV -->
-<div class="nav">
-  <button onclick="scrollToTop()"><i class="fas fa-wallet"></i>Wallet</button>
-  <button onclick="openDepositModal()"><i class="fas fa-arrow-down"></i>Deposit</button>
-  <button onclick="openWithdrawModal()"><i class="fas fa-arrow-up"></i>Withdraw</button>
-  <button onclick="openHistoryModal()"><i class="fas fa-clock"></i>History</button>
-  <button onclick="openSettings()"><i class="fas fa-cog"></i>Settings</button>
+<!-- ===== DEPOSIT SCREEN ===== -->
+<div id="depositScreen" class="screen">
+<div class="screen-box">
+
+<button onclick="closeDeposit()">Back</button>
+
+<h3>Deposit</h3>
+
+<img id="qr" width="200">
+
+<div id="addr"></div>
+
+<button onclick="copy()">Copy</button>
+
+</div>
+</div>
+
+<!-- ===== WITHDRAW SCREEN ===== -->
+<div id="withdrawScreen" class="screen">
+<div class="screen-box">
+
+<button onclick="closeWithdraw()">Back</button>
+
+<h3>Withdraw</h3>
+
+<input id="wAddr" placeholder="Wallet"><br><br>
+<input id="wAmt" placeholder="Amount"><br><br>
+
+<button onclick="send()">Send</button>
+
+</div>
 </div>
 
 <script>
-const API_BASE = "https://tbl-earn-production.up.railway.app";
-let API_KEY = localStorage.getItem("safeora_api_key");
+const API="https://safeora.onrender.com"
+let KEY=localStorage.getItem("key")
 
-async function createApiKey(){
-  let id = prompt("Enter User ID");
-  if(!id) return;
+// CREATE API
+async function createApi(){
+let id=prompt("User ID")
+let r=await fetch(API+"/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({user_id:id})})
+let d=await r.json()
 
-  let res = await fetch(API_BASE + "/api/register",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({user_id:id})
-  });
-
-  let data = await res.json();
-
-  if(data.success){
-    API_KEY = data.api_key;
-    localStorage.setItem("safeora_api_key",API_KEY);
-    document.getElementById("apiKeyDisplay").innerText = API_KEY;
-  }
+if(d.success){
+KEY=d.api_key
+localStorage.setItem("key",KEY)
+document.getElementById("apiKey").innerText=KEY
+}
 }
 
-async function loadBalance(){
-  if(!API_KEY) return;
+// LOAD BALANCE
+async function load(){
+if(!KEY)return
 
-  let res = await fetch(API_BASE + "/api/balance",{
-    headers:{"x-api-key":API_KEY}
-  });
+let r=await fetch(API+"/api/balance",{headers:{"x-api-key":KEY}})
+let d=await r.json()
 
-  let d = await res.json();
+if(d.success){
+let ton=d.balance
 
-  if(d.success){
-    document.getElementById("tonBalance").innerText = d.balance;
-    document.getElementById("totalUsd").innerText = "$"+d.balance;
-  }
+document.getElementById("tonBalance").innerText=ton
+
+// LIVE PRICE
+let price=await fetch("https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd")
+let p=await price.json()
+
+let usd=ton*p["the-open-network"].usd
+
+document.getElementById("tonUsd").innerText="$"+usd.toFixed(2)
+document.getElementById("totalUsd").innerText="$"+usd.toFixed(2)
+}
 }
 
-function openDepositModal(){ alert("Deposit system"); }
-function openWithdrawModal(){ alert("Withdraw system"); }
-function openHistoryModal(){ alert("History system"); }
-function openSettings(){ alert("Settings"); }
-function scrollToTop(){ window.scrollTo(0,0); }
+// DEPOSIT
+async function openDeposit(){
+document.getElementById("depositScreen").style.display="block"
 
-setInterval(loadBalance,15000);
-loadBalance();
-</script>
-<!-- ===== DEPOSIT SCREEN ===== -->
-<div id="depositScreen" style="
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:#0f172a;
-z-index:999;
-display:none;
-overflow:auto;
-">
+let r=await fetch(API+"/api/deposit/info",{headers:{"x-api-key":KEY}})
+let d=await r.json()
 
-<div style="max-width:480px;margin:auto;padding:20px;color:white;">
+document.getElementById("addr").innerText=d.deposit_address
 
-<!-- HEADER -->
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-  <i class="fas fa-arrow-left" onclick="closeDeposit()" style="font-size:20px;cursor:pointer;"></i>
-  <b>Deposit</b>
-  <i class="fas fa-ellipsis-v"></i>
-</div>
-
-<!-- TOKEN -->
-<div style="background:#111827;padding:14px;border-radius:14px;margin-bottom:12px;">
-  <b>Tether (USDT)</b>
-</div>
-
-<!-- NETWORK -->
-<div style="background:#111827;padding:14px;border-radius:14px;margin-bottom:20px;">
-  <b>TON Network</b>
-</div>
-
-<!-- QR -->
-<div style="text-align:center;margin-bottom:15px;">
-  <img id="qrImg" src="" style="width:180px;height:180px;background:white;padding:10px;border-radius:10px;">
-</div>
-
-<!-- ADDRESS -->
-<div style="text-align:center;font-size:12px;word-break:break-all;margin-bottom:10px;" id="depositAddress">
-Loading...
-</div>
-
-<button onclick="copyAddress()" style="
-width:100%;
-padding:12px;
-border:none;
-border-radius:12px;
-background:#3b82f6;
-color:white;
-margin-bottom:15px;
-">
-Copy Address
-</button>
-
-<!-- INFO -->
-<div style="background:#111827;padding:12px;border-radius:12px;font-size:12px;color:#94a3b8;">
-Minimum Receive 0.01 USDT<br><br>
-Send only USDT on TON network.<br>
-Wrong coin = loss
-</div>
-
-</div>
-</div>
-<!-- ===== WITHDRAW SCREEN ===== -->
-<div id="withdrawScreen" style="
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:#0f172a;
-z-index:999;
-display:none;
-">
-
-<div style="max-width:480px;margin:auto;padding:20px;color:white;">
-
-<!-- HEADER -->
-<div style="display:flex;justify-content:space-between;margin-bottom:20px;">
-  <i class="fas fa-arrow-left" onclick="closeWithdraw()"></i>
-  <b>Withdraw TON</b>
-  <i class="fas fa-cog"></i>
-</div>
-
-<input id="withdrawAddress" placeholder="Enter TON Address" style="
-width:100%;
-padding:12px;
-margin-bottom:10px;
-border-radius:10px;
-border:none;
-background:#111827;
-color:white;
-">
-
-<input id="withdrawAmount" placeholder="Amount (TON)" type="number" style="
-width:100%;
-padding:12px;
-margin-bottom:15px;
-border-radius:10px;
-border:none;
-background:#111827;
-color:white;
-">
-
-<button onclick="submitWithdraw()" style="
-width:100%;
-padding:14px;
-background:#22c55e;
-border:none;
-border-radius:12px;
-color:white;
-font-weight:bold;
-">
-Send TON
-</button>
-
-</div>
-</div>
-// OPEN FULL UI
-function openDepositModal(){
-  document.getElementById("depositScreen").style.display = "block";
-  loadDepositUI();
+document.getElementById("qr").src=
+"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+d.deposit_address
 }
 
 function closeDeposit(){
-  document.getElementById("depositScreen").style.display = "none";
+document.getElementById("depositScreen").style.display="none"
 }
 
-function openWithdrawModal(){
-  document.getElementById("withdrawScreen").style.display = "block";
-}
-
-function closeWithdraw(){
-  document.getElementById("withdrawScreen").style.display = "none";
-}
-
-// LOAD DEPOSIT DATA
-async function loadDepositUI(){
-  const info = await getDepositInfo();
-  if(!info) return;
-
-  document.getElementById("depositAddress").innerText = info.deposit_address;
-
-  // QR GENERATE
-  document.getElementById("qrImg").src =
-    "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + info.deposit_address;
-}
-
-// COPY
-function copyAddress(){
-  let text = document.getElementById("depositAddress").innerText;
-  navigator.clipboard.writeText(text);
-  alert("Copied!");
+function copy(){
+navigator.clipboard.writeText(document.getElementById("addr").innerText)
+alert("Copied")
 }
 
 // WITHDRAW
-async function submitWithdraw(){
-  let address = document.getElementById("withdrawAddress").value;
-  let amount = document.getElementById("withdrawAmount").value;
-
-  if(!address || !amount){
-    alert("Fill all fields");
-    return;
-  }
-
-  let res = await withdrawTon(amount,address);
-
-  if(res){
-    closeWithdraw();
-  }
+function openWithdraw(){
+document.getElementById("withdrawScreen").style.display="block"
 }
 
+function closeWithdraw(){
+document.getElementById("withdrawScreen").style.display="none"
+}
+
+async function send(){
+let addr=document.getElementById("wAddr").value
+let amt=document.getElementById("wAmt").value
+
+let r=await fetch(API+"/api/withdraw",{
+method:"POST",
+headers:{
+"x-api-key":KEY,
+"Content-Type":"application/json"
+},
+body:JSON.stringify({wallet:addr,amount:amt})
+})
+
+let d=await r.json()
+alert(JSON.stringify(d))
+}
+
+// AUTO LOAD
+setInterval(load,10000)
+load()
+</script>
 
 </body>
 </html>
-
