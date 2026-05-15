@@ -1,198 +1,400 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>SAFEORA Wallet</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
-body{background:#0a0c12;color:white;font-family:sans-serif;margin:0}
-.container{max-width:480px;margin:auto;padding:15px}
-
-/* CARD */
-.card{background:#111827;padding:20px;border-radius:20px;margin-bottom:15px;text-align:center}
-.balance{font-size:30px;font-weight:bold}
-
-/* BUTTON GRID FIX */
-.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:15px}
-.action{background:#1f2937;padding:12px;border-radius:12px}
-
-/* ASSET */
-.asset{display:flex;justify-content:space-between;background:#111827;padding:12px;border-radius:12px;margin-bottom:10px}
-
-/* FULL SCREEN MODAL */
-.screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#0f172a;display:none;z-index:999}
-.screen-box{max-width:480px;margin:auto;padding:20px}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h2>SAFEORA</h2>
-
-<div class="card">
-<div>Total Balance</div>
-<div class="balance" id="totalUsd">$0</div>
-
-<div class="actions">
-<div class="action" onclick="openDeposit()">Deposit</div>
-<div class="action" onclick="openWithdraw()">Withdraw</div>
-<div class="action" onclick="loadHistory()">History</div>
-</div>
-</div>
-
-<!-- ASSETS -->
-<div class="asset">
-<div>TON</div>
-<div>
-<div id="tonBalance">0</div>
-<div id="tonUsd">$0</div>
-</div>
-</div>
-
-<div class="asset">
-<div>USDT</div>
-<div>
-<div id="usdtBalance">0</div>
-<div id="usdtUsd">$0</div>
-</div>
-</div>
-
-<!-- API -->
-<button onclick="createApi()">Generate API</button>
-<div id="apiKey"></div>
-
-</div>
-
-<!-- ===== DEPOSIT SCREEN ===== -->
-<div id="depositScreen" class="screen">
-<div class="screen-box">
-
-<button onclick="closeDeposit()">Back</button>
-
-<h3>Deposit</h3>
-
-<img id="qr" width="200">
-
-<div id="addr"></div>
-
-<button onclick="copy()">Copy</button>
-
-</div>
-</div>
-
-<!-- ===== WITHDRAW SCREEN ===== -->
-<div id="withdrawScreen" class="screen">
-<div class="screen-box">
-
-<button onclick="closeWithdraw()">Back</button>
-
-<h3>Withdraw</h3>
-
-<input id="wAddr" placeholder="Wallet"><br><br>
-<input id="wAmt" placeholder="Amount"><br><br>
-
-<button onclick="send()">Send</button>
-
-</div>
-</div>
-
-<script>
-const API="https://safeora.onrender.com"
-let KEY=localStorage.getItem("key")
-
-// CREATE API
-async function createApi(){
-let id=prompt("User ID")
-let r=await fetch(API+"/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({user_id:id})})
-let d=await r.json()
-
-if(d.success){
-KEY=d.api_key
-localStorage.setItem("key",KEY)
-document.getElementById("apiKey").innerText=KEY
+:root{
+  --bg:#07090f; --s1:#0c1120; --s2:#111827; --s3:#1a2336;
+  --border:rgba(255,255,255,0.06); --border2:rgba(255,255,255,0.1);
+  --blue:#3b82f6; --blue2:#2563eb; --blue3:#1d4ed8;
+  --green:#22c55e; --green2:#16a34a;
+  --gold:#f59e0b; --red:#ef4444; --red2:#dc2626;
+  --text:#f8fafc; --text2:#cbd5e1; --muted:#64748b; --muted2:#94a3b8;
+  --radius:16px;
 }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;overflow:hidden}
+body{
+  background:var(--bg); font-family:'Outfit',sans-serif;
+  color:var(--text); height:100%; overflow:hidden;
+  overscroll-behavior:none;
 }
 
-// LOAD BALANCE
-async function load(){
-if(!KEY)return
-
-let r=await fetch(API+"/api/balance",{headers:{"x-api-key":KEY}})
-let d=await r.json()
-
-if(d.success){
-let ton=d.balance
-
-document.getElementById("tonBalance").innerText=ton
-
-// LIVE PRICE
-let price=await fetch("https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd")
-let p=await price.json()
-
-let usd=ton*p["the-open-network"].usd
-
-document.getElementById("tonUsd").innerText="$"+usd.toFixed(2)
-document.getElementById("totalUsd").innerText="$"+usd.toFixed(2)
+/* ── SCREEN SYSTEM ── */
+.screen{
+  display:none; position:absolute; inset:0;
+  overflow-y:auto; overflow-x:hidden;
+  padding-bottom:80px;
+  -webkit-overflow-scrolling:touch;
 }
+.screen.active{display:block; animation:sIn .3s cubic-bezier(.4,0,.2,1) both}
+@keyframes sIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TOPBAR ── */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 20px 0; position:sticky; top:0;
+  background:var(--bg); z-index:10;
+}
+.brand{display:flex; align-items:center; gap:11px}
+.brand-logo{
+  width:42px; height:42px; border-radius:50%; overflow:hidden;
+  flex-shrink:0; box-shadow:0 0 18px rgba(59,130,246,.35);
+}
+.brand-logo img{width:100%; height:100%; object-fit:cover}
+.brand-name{font-size:20px; font-weight:900; letter-spacing:.05em}
+.brand-name em{color:var(--blue); font-style:normal}
+.brand-sub{font-size:10px; color:var(--muted); letter-spacing:.06em; margin-top:1px}
+.topbar-right{display:flex; gap:8px}
+.icon-btn{
+  width:40px; height:40px; background:var(--s2);
+  border:1px solid var(--border2); border-radius:12px;
+  display:grid; place-items:center; cursor:pointer; transition:.2s;
+}
+.icon-btn:hover{border-color:var(--blue)}
+.icon-btn svg{width:18px; height:18px; stroke:var(--muted2); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+
+/* ── BACK HEADER ── */
+.back-hdr{
+  display:flex; align-items:center; gap:13px;
+  padding:20px 20px 0; position:sticky; top:0;
+  background:var(--bg); z-index:10;
+}
+.back-btn{
+  width:38px; height:38px; background:var(--s2);
+  border:1px solid var(--border2); border-radius:11px;
+  display:grid; place-items:center; cursor:pointer;
+  transition:.2s; flex-shrink:0;
+}
+.back-btn:active{transform:scale(.92)}
+.back-btn svg{width:18px; height:18px; stroke:var(--text2); fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round}
+.back-title{font-size:18px; font-weight:700}
+
+/* ── BALANCE BANNER ── */
+.banner{
+  margin:16px 16px 0; border-radius:22px; overflow:hidden;
+  position:relative; min-height:168px;
+  box-shadow:0 20px 50px rgba(29,78,216,.4);
+}
+.banner-img{
+  position:absolute; inset:0;
+  background:url('https://iili.io/BmUYlKG.png') center/cover no-repeat;
+}
+.banner-overlay{
+  position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(15,30,80,.55) 0%,rgba(10,20,60,.3) 100%);
+}
+.banner-content{position:relative; z-index:1; padding:22px 22px 20px}
+.banner-lbl{
+  display:flex; align-items:center; gap:8px;
+  font-size:12px; color:rgba(255,255,255,.75); font-weight:500;
+  letter-spacing:.05em; text-transform:uppercase;
+}
+.eye-btn{
+  width:22px; height:22px; cursor:pointer; opacity:.8;
+  display:grid; place-items:center;
+}
+.eye-btn svg{width:16px; height:16px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.banner-amt{
+  font-size:42px; font-weight:900; line-height:1.05;
+  margin-top:8px; text-shadow:0 2px 14px rgba(0,0,0,.4);
+  font-family:'Outfit',sans-serif; letter-spacing:-.01em;
+}
+.banner-sub{
+  font-size:13px; color:rgba(255,255,255,.6);
+  margin-top:5px; font-family:'JetBrains Mono',monospace;
+}
+.banner-badge{
+  position:absolute; top:20px; right:20px; z-index:2;
+  background:rgba(34,197,94,.18); border:1px solid rgba(34,197,94,.3);
+  border-radius:20px; padding:4px 12px;
+  font-size:11px; color:#4ade80; font-weight:700;
 }
 
-// DEPOSIT
-async function openDeposit(){
-document.getElementById("depositScreen").style.display="block"
+/* ── ACTION ROW ── */
+.act-row{
+  margin:12px 16px 0; background:var(--s1);
+  border:1px solid var(--border2); border-radius:20px;
+  display:flex; overflow:hidden;
+}
+.act-btn{
+  flex:1; padding:15px 6px; display:flex; flex-direction:column;
+  align-items:center; gap:7px; cursor:pointer; transition:.2s;
+  position:relative;
+}
+.act-btn:not(:last-child)::after{
+  content:''; position:absolute; right:0; top:18%; height:64%;
+  width:1px; background:var(--border2);
+}
+.act-btn:active{background:rgba(255,255,255,.04)}
+.act-ico{
+  width:44px; height:44px; border-radius:50%;
+  display:grid; place-items:center;
+}
+.act-ico svg{width:20px; height:20px; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round}
+.a-dep  .act-ico{background:rgba(34,197,94,.15)}
+.a-dep  .act-ico svg{stroke:#22c55e}
+.a-with .act-ico{background:rgba(59,130,246,.15)}
+.a-with .act-ico svg{stroke:#3b82f6}
+.a-hist .act-ico{background:rgba(139,92,246,.15)}
+.a-hist .act-ico svg{stroke:#8b5cf6}
+.act-lbl{font-size:11px; color:var(--muted2); font-weight:600; letter-spacing:.03em}
 
-let r=await fetch(API+"/api/deposit/info",{headers:{"x-api-key":KEY}})
-let d=await r.json()
+/* ── CARD ── */
+.card{
+  margin:12px 16px 0; background:var(--s1);
+  border:1px solid var(--border2); border-radius:20px; overflow:hidden;
+}
+.card-hdr{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:15px 18px 12px; border-bottom:1px solid var(--border);
+}
+.card-title{font-size:14px; font-weight:700; letter-spacing:.02em}
+.card-link{font-size:12px; color:var(--blue); cursor:pointer; font-weight:600}
 
-document.getElementById("addr").innerText=d.deposit_address
+/* ── ASSET ROW ── */
+.asset-row{
+  display:flex; align-items:center; gap:13px;
+  padding:13px 18px; transition:background .18s; cursor:pointer;
+}
+.asset-row:not(:last-child){border-bottom:1px solid var(--border)}
+.asset-row:active{background:rgba(255,255,255,.02)}
+.a-logo{width:42px; height:42px; border-radius:50%; flex-shrink:0; overflow:hidden}
+.a-logo img{width:100%; height:100%; object-fit:cover; border-radius:50%}
+.a-name{font-size:14px; font-weight:600}
+.a-sym{font-size:11px; color:var(--muted); margin-top:2px}
+.a-right{margin-left:auto; text-align:right}
+.a-bal{font-size:14px; font-weight:700; font-family:'JetBrains Mono',monospace}
+.a-usd{font-size:11px; color:var(--muted); margin-top:2px}
+.a-chg{font-size:10px; padding:2px 7px; border-radius:5px; display:inline-block; margin-top:3px; font-weight:700}
+.up  {background:rgba(34,197,94,.12);  color:#22c55e}
+.down{background:rgba(239,68,68,.12);  color:#ef4444}
 
-document.getElementById("qr").src=
-"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+d.deposit_address
+/* ── API ROW ── */
+.api-row{
+  margin:12px 16px 0; background:var(--s1);
+  border:1px solid var(--border2); border-radius:18px;
+  padding:14px 18px; display:flex; align-items:center;
+  gap:14px; cursor:pointer; transition:.2s;
+}
+.api-row:active{background:var(--s2)}
+.api-ico{
+  width:44px; height:44px; flex-shrink:0;
+  background:linear-gradient(135deg,#1d4ed8,#0ea5e9);
+  border-radius:13px; display:grid; place-items:center;
+}
+.api-ico svg{width:22px; height:22px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.api-t1{font-size:14px; font-weight:700}
+.api-t2{font-size:11px; color:var(--muted); margin-top:2px}
+.api-arr{margin-left:auto; color:var(--muted); font-size:20px; line-height:1}
+
+/* ── SECTION LABEL ── */
+.sec-lbl{
+  font-size:10px; font-weight:800; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted);
+  padding:18px 18px 8px;
 }
 
-function closeDeposit(){
-document.getElementById("depositScreen").style.display="none"
+/* ── DEPOSIT ── */
+.dep-box{margin:14px 16px 0; background:var(--s1); border:1px solid var(--border2); border-radius:20px; padding:20px}
+.qr-area{display:flex; justify-content:center; margin-bottom:20px}
+.qr-wrap{width:138px; height:138px; background:white; border-radius:14px; display:grid; place-items:center; overflow:hidden; padding:6px}
+.qr-wrap img{width:100%; height:100%; border-radius:8px}
+.qr-ph{
+  width:138px; height:138px; background:var(--s2);
+  border:1px dashed var(--border2); border-radius:14px;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:8px; color:var(--muted);
+  font-size:11px; text-align:center; padding:14px;
 }
+.qr-ph svg{width:28px; height:28px; stroke:var(--muted); fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round}
 
-function copy(){
-navigator.clipboard.writeText(document.getElementById("addr").innerText)
-alert("Copied")
+.field-lbl{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.09em; margin-bottom:7px; font-weight:700}
+.copy-field{
+  background:var(--s2); border:1px solid var(--border2);
+  border-radius:13px; padding:12px 14px;
+  display:flex; align-items:center; gap:10px; margin-bottom:14px;
 }
-
-// WITHDRAW
-function openWithdraw(){
-document.getElementById("withdrawScreen").style.display="block"
+.copy-val{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--blue); word-break:break-all; flex:1}
+.copy-ico{
+  flex-shrink:0; cursor:pointer; opacity:.55; transition:.2s;
+  display:grid; place-items:center;
 }
+.copy-ico:hover{opacity:1}
+.copy-ico svg{width:17px; height:17px; stroke:var(--muted2); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.memo-c{color:var(--gold) !important}
 
-function closeWithdraw(){
-document.getElementById("withdrawScreen").style.display="none"
+.notice{
+  background:rgba(245,158,11,.07); border:1px solid rgba(245,158,11,.18);
+  border-radius:13px; padding:12px 14px;
+  font-size:12px; color:rgba(245,158,11,.9); line-height:1.65;
+  display:flex; gap:9px; align-items:flex-start;
 }
+.notice svg{width:16px; height:16px; flex-shrink:0; stroke:#f59e0b; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-top:1px}
 
-async function send(){
-let addr=document.getElementById("wAddr").value
-let amt=document.getElementById("wAmt").value
-
-let r=await fetch(API+"/api/withdraw",{
-method:"POST",
-headers:{
-"x-api-key":KEY,
-"Content-Type":"application/json"
-},
-body:JSON.stringify({wallet:addr,amount:amt})
-})
-
-let d=await r.json()
-alert(JSON.stringify(d))
+/* ── BUTTONS ── */
+.btn{
+  width:100%; padding:15px; border:none; border-radius:14px;
+  color:white; font-family:'Outfit',sans-serif; font-size:15px;
+  font-weight:700; cursor:pointer; transition:.2s; margin-top:14px;
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  letter-spacing:.02em; position:relative; overflow:hidden;
 }
+.btn::after{content:''; position:absolute; inset:0; background:white; opacity:0; transition:.15s}
+.btn:active::after{opacity:.06}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+.btn-blue  {background:linear-gradient(135deg,var(--blue),var(--blue3))}
+.btn-green {background:linear-gradient(135deg,var(--green),var(--green2))}
+.btn-red   {background:linear-gradient(135deg,var(--red),var(--red2))}
+.btn svg{width:18px; height:18px; stroke:white; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0}
 
-// AUTO LOAD
-setInterval(load,10000)
-load()
-</script>
+/* ── WITHDRAW FORM ── */
+.w-form{margin:14px 16px 0; background:var(--s1); border:1px solid var(--border2); border-radius:20px; padding:20px}
+.fg{margin-bottom:16px}
+.i-lbl{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.09em; display:block; margin-bottom:7px; font-weight:700}
+.i-wrap{position:relative}
+.i-field{
+  width:100%; background:var(--s2); border:1.5px solid var(--border2);
+  border-radius:13px; padding:13px 16px; color:var(--text);
+  font-family:'Outfit',sans-serif; font-size:14px; outline:none; transition:.2s;
+  -webkit-appearance:none;
+}
+.i-field:focus{border-color:var(--blue); box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.i-field::placeholder{color:var(--muted)}
+.i-field.error{border-color:var(--red); box-shadow:0 0 0 3px rgba(239,68,68,.1)}
+.i-field.ok{border-color:var(--green)}
+.i-err{font-size:11px; color:var(--red); margin-top:5px; display:none}
+.i-err.show{display:block}
+.i-ok{font-size:11px; color:var(--green); margin-top:5px; display:none}
+.i-ok.show{display:block}
 
-</body>
-</html>
+.amt-field-wrap{position:relative}
+.amt-field-wrap .i-field{padding-right:72px; font-size:20px; font-weight:800; font-family:'JetBrains Mono',monospace; letter-spacing:-.01em}
+.max-btn{
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  font-size:11px; font-weight:800; color:var(--blue);
+  background:rgba(59,130,246,.12); padding:5px 11px; border-radius:8px;
+  cursor:pointer; letter-spacing:.04em; transition:.2s;
+}
+.max-btn:hover{background:rgba(59,130,246,.22)}
+.avail-row{display:flex; justify-content:space-between; align-items:center; margin-top:7px}
+.avail-lbl{font-size:12px; color:var(--muted)}
+.avail-val{font-size:12px; color:var(--text2); font-weight:600; font-family:'JetBrains Mono',monospace}
+
+.detail-rows{display:flex; flex-direction:column; gap:6px; margin-top:4px}
+.d-row{
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:12px; padding:11px 15px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.d-lbl{font-size:12px; color:var(--muted)}
+.d-val{font-size:13px; font-weight:700; font-family:'JetBrains Mono',monospace}
+
+/* ── ASSET TABS ── */
+.asset-tabs{display:flex; gap:8px; padding:14px 16px 0}
+.a-tab{
+  padding:7px 18px; background:var(--s2);
+  border:1px solid var(--border2); border-radius:20px;
+  font-size:12px; font-weight:700; color:var(--muted);
+  cursor:pointer; transition:.2s; letter-spacing:.03em;
+}
+.a-tab.active{background:var(--blue); border-color:var(--blue); color:white}
+
+/* ── HISTORY ── */
+.hist-filters{display:flex; gap:8px; padding:14px 16px 0; overflow-x:auto; scrollbar-width:none}
+.hist-filters::-webkit-scrollbar{display:none}
+.filt-btn{padding:7px 16px; background:var(--s2); border:1px solid var(--border2); border-radius:20px; font-size:12px; font-weight:700; color:var(--muted); cursor:pointer; transition:.2s; white-space:nowrap; flex-shrink:0}
+.filt-btn.active{background:var(--blue); border-color:var(--blue); color:white}
+.hist-list{padding:0 16px; margin-top:10px}
+.hist-item{display:flex; align-items:center; gap:13px; padding:13px 0; border-bottom:1px solid var(--border)}
+.hist-ico{width:42px; height:42px; border-radius:50%; flex-shrink:0; display:grid; place-items:center}
+.hist-ico svg{width:19px; height:19px; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round}
+.h-dep .hist-ico{background:rgba(34,197,94,.14)}
+.h-dep .hist-ico svg{stroke:#22c55e}
+.h-with .hist-ico{background:rgba(59,130,246,.14)}
+.h-with .hist-ico svg{stroke:#3b82f6}
+.h-type{font-size:14px; font-weight:600}
+.h-date{font-size:11px; color:var(--muted); margin-top:2px; font-family:'JetBrains Mono',monospace}
+.h-right{margin-left:auto; text-align:right}
+.h-amt{font-size:14px; font-weight:800; font-family:'JetBrains Mono',monospace}
+.h-amt.pos{color:var(--green)}
+.h-amt.neg{color:var(--blue)}
+.h-badge{font-size:10px; padding:2px 8px; border-radius:5px; display:inline-block; margin-top:3px; font-weight:700}
+.b-ok{background:rgba(34,197,94,.12); color:#22c55e}
+.hist-empty{text-align:center; padding:48px 20px; color:var(--muted)}
+.hist-empty svg{width:44px; height:44px; stroke:var(--muted); fill:none; stroke-width:1.5; margin-bottom:12px; stroke-linecap:round; stroke-linejoin:round}
+.hist-empty p{font-size:14px; margin-bottom:5px}
+.hist-empty span{font-size:12px; color:var(--muted)}
+
+/* ── API / SETTINGS ── */
+.api-content{padding:0 16px; margin-top:14px}
+.api-card{background:var(--s1); border:1px solid var(--border2); border-radius:20px; padding:20px; margin-bottom:12px}
+.api-key-box{
+  background:var(--s2); border:1px solid var(--border2);
+  border-radius:12px; padding:12px 14px;
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  color:var(--blue); word-break:break-all; min-height:42px;
+  display:flex; align-items:center; margin-bottom:14px;
+}
+.api-key-box.empty{color:var(--muted); font-family:'Outfit',sans-serif; font-style:italic; font-size:12px}
+
+.docs-btn{
+  width:100%; padding:15px; border-radius:14px; border:none;
+  background:linear-gradient(135deg,#7c3aed,#6d28d9);
+  color:white; font-family:'Outfit',sans-serif; font-size:15px;
+  font-weight:700; cursor:pointer; transition:.2s;
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  letter-spacing:.02em; margin-bottom:12px;
+}
+.docs-btn:active{transform:scale(.98)}
+.docs-btn svg{width:18px; height:18px; stroke:white; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+
+.ep-list{display:flex; flex-direction:column; gap:7px}
+.ep-item{background:var(--s2); border:1px solid var(--border); border-radius:12px; padding:11px 14px; display:flex; align-items:flex-start; gap:11px}
+.ep-m{font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; font-family:'JetBrains Mono',monospace; flex-shrink:0; margin-top:2px; letter-spacing:.04em}
+.m-get {background:rgba(34,197,94,.14); color:#22c55e}
+.m-post{background:rgba(59,130,246,.14); color:#3b82f6}
+.ep-path{font-size:12px; font-family:'JetBrains Mono',monospace; color:var(--text2); font-weight:500}
+.ep-desc{font-size:11px; color:var(--muted); margin-top:3px}
+
+/* ── BOTTOM NAV ── */
+.bot-nav{
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px;
+  background:rgba(7,9,15,.97); backdrop-filter:blur(24px);
+  border-top:1px solid var(--border2);
+  display:flex; padding:10px 0; z-index:100;
+  padding-bottom:max(10px, env(safe-area-inset-bottom));
+}
+.nav-it{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; transition:.2s; padding:4px 0; position:relative}
+.nav-it:active{transform:scale(.9)}
+.nav-niw{width:44px; height:32px; display:grid; place-items:center; border-radius:10px; transition:.2s}
+.nav-ni svg{width:22px; height:22px; stroke:var(--muted); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; transition:.2s}
+.nav-nl{font-size:9px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.06em; transition:.2s}
+.nav-it.active .nav-niw{background:rgba(59,130,246,.14)}
+.nav-it.active .nav-ni svg{stroke:var(--blue)}
+.nav-it.active .nav-nl{color:var(--blue)}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(10px);
+  background:var(--s2); border:1px solid var(--border2); border-radius:12px;
+  padding:10px 20px; font-size:13px; font-weight:500;
+  opacity:0; pointer-events:none; transition:.25s ease; white-space:nowrap; z-index:999;
+  box-shadow:0 8px 30px rgba(0,0,0,.4);
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.ok {border-color:rgba(34,197,94,.35); color:#4ade80}
+.toast.err{border-color:rgba(239,68,68,.35);  color:#f87171}
+.toast.inf{border-color:rgba(59,130,246,.35);  color:#60a5fa}
+
+/* ── PULSE ANIMATION ── */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pulse{animation:pulse 2s infinite}
+
+/* ── SHIMMER ── */
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.shimmer{
