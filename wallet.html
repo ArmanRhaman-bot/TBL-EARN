@@ -398,3 +398,404 @@ body{
 /* ── SHIMMER ── */
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .shimmer{
+  background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.6s infinite;
+  border-radius:8px;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ WALLET SCREEN ══════════ -->
+<div class="screen active" id="s-wallet">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-logo"><img src="https://iili.io/BDk3VLl.jpg" alt="SAFEORA"/></div>
+      <div>
+        <div class="brand-name">SAFE<em>ORA</em></div>
+        <div class="brand-sub">Secure · Decentral · Vault</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" id="refresh-btn" onclick="loadBalance()">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </div>
+      <div class="icon-btn" onclick="go('s-api')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- BALANCE BANNER -->
+  <div class="banner">
+    <div class="banner-img"></div>
+    <div class="banner-overlay"></div>
+    <div class="banner-content">
+      <div class="banner-lbl">
+        Total Balance
+        <div class="eye-btn" onclick="toggleHide()">
+          <svg id="eye-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+      </div>
+      <div class="banner-amt" id="totalUsd">$0.00</div>
+      <div class="banner-sub" id="tonSub">≈ 0.000000 TON</div>
+    </div>
+    <div class="banner-badge pulse">● Live</div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="act-row">
+    <div class="act-btn a-dep" onclick="go('s-deposit')">
+      <div class="act-ico">
+        <svg viewBox="0 0 24 24"><path d="M12 2v12"/><path d="m5 9 7 7 7-7"/><path d="M5 20h14"/></svg>
+      </div>
+      <div class="act-lbl">Deposit</div>
+    </div>
+    <div class="act-btn a-with" onclick="go('s-withdraw')">
+      <div class="act-ico">
+        <svg viewBox="0 0 24 24"><path d="M12 22V10"/><path d="m19 15-7-7-7 7"/><path d="M5 4h14"/></svg>
+      </div>
+      <div class="act-lbl">Withdraw</div>
+    </div>
+    <div class="act-btn a-hist" onclick="go('s-history')">
+      <div class="act-ico">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="act-lbl">History</div>
+    </div>
+  </div>
+
+  <!-- ASSETS -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="card-title">Assets</div>
+      <div class="card-link">Manage</div>
+    </div>
+    <div class="asset-row">
+      <div class="a-logo"><img src="https://iili.io/BmeGc8l.jpg" alt="TON"/></div>
+      <div><div class="a-name">TON Coin</div><div class="a-sym">TON · Mainnet</div></div>
+      <div class="a-right">
+        <div class="a-bal" id="tonBal">0.000000</div>
+        <div class="a-usd" id="tonUsdVal">$0.00</div>
+        <div class="a-chg up">+2.4%</div>
+      </div>
+    </div>
+    <div class="asset-row">
+      <div class="a-logo"><img src="https://iili.io/Bme5zTG.jpg" alt="USDT"/></div>
+      <div><div class="a-name">Tether</div><div class="a-sym">USDT · TON</div></div>
+      <div class="a-right">
+        <div class="a-bal">0.00</div>
+        <div class="a-usd">$0.00</div>
+        <div class="a-chg up">+0.01%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API ACCESS -->
+  <div class="api-row" onclick="go('s-api')">
+    <div class="api-ico">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    </div>
+    <div><div class="api-t1">API Access</div><div class="api-t2" id="apiStatusTxt">Manage your developer API keys</div></div>
+    <div class="api-arr">›</div>
+  </div>
+</div>
+
+
+<!-- ══════════ DEPOSIT SCREEN ══════════ -->
+<div class="screen" id="s-deposit">
+  <div class="back-hdr">
+    <div class="back-btn" onclick="go('s-wallet')">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="back-title">Deposit</div>
+  </div>
+
+  <!-- ASSET TABS -->
+  <div class="asset-tabs">
+    <div class="a-tab active" onclick="switchDepAsset(this,'TON')">TON</div>
+    <div class="a-tab" onclick="switchDepAsset(this,'USDT')">USDT</div>
+  </div>
+
+  <div class="dep-box">
+    <div class="qr-area" id="qr-area">
+      <div class="qr-ph">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Generate API key first
+      </div>
+    </div>
+
+    <div class="field-lbl">Deposit Address</div>
+    <div class="copy-field">
+      <div class="copy-val" id="dep-addr">— Generate API key first</div>
+      <div class="copy-ico" onclick="cp('dep-addr','Address')">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </div>
+    </div>
+
+    <div class="field-lbl">Memo / Comment <span style="color:var(--red);font-size:11px">* Required</span></div>
+    <div class="copy-field">
+      <div class="copy-val memo-c" id="dep-memo">—</div>
+      <div class="copy-ico" onclick="cp('dep-memo','Memo')">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </div>
+    </div>
+
+    <div class="notice">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Always include the <strong>Memo/Comment</strong> when sending TON. Transactions without memo will not be credited.
+    </div>
+
+    <button class="btn btn-green" id="verify-btn" onclick="verifyDeposit()">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Verify Deposit
+    </button>
+  </div>
+
+  <div class="sec-lbl">Network Details</div>
+  <div style="padding:0 16px; display:flex; flex-direction:column; gap:6px; padding-bottom:10px">
+    <div class="d-row"><div class="d-lbl">Network</div><div class="d-val" style="color:var(--blue)">TON Mainnet</div></div>
+    <div class="d-row"><div class="d-lbl">Min Deposit</div><div class="d-val">0.01 TON</div></div>
+    <div class="d-row"><div class="d-lbl">Confirmation Time</div><div class="d-val">~5 sec</div></div>
+    <div class="d-row"><div class="d-lbl">Network Fee</div><div class="d-val">0.001 TON</div></div>
+  </div>
+</div>
+
+
+<!-- ══════════ WITHDRAW SCREEN ══════════ -->
+<div class="screen" id="s-withdraw">
+  <div class="back-hdr">
+    <div class="back-btn" onclick="go('s-wallet')">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="back-title">Withdraw</div>
+  </div>
+
+  <!-- ASSET TABS -->
+  <div class="asset-tabs">
+    <div class="a-tab active" onclick="switchWithdrawAsset(this,'TON')">TON</div>
+    <div class="a-tab" onclick="switchWithdrawAsset(this,'USDT')">USDT</div>
+  </div>
+
+  <div class="w-form">
+    <div class="fg">
+      <label class="i-lbl">Recipient TON Address</label>
+      <div class="i-wrap">
+        <input class="i-field" id="w-addr" type="text" placeholder="EQxxxxxxxxxxxxxxxxxxxx" oninput="validateAddr()"/>
+      </div>
+      <div class="i-err" id="addr-err">Invalid TON address format</div>
+      <div class="i-ok" id="addr-ok">Valid address ✓</div>
+    </div>
+
+    <div class="fg">
+      <label class="i-lbl" id="amt-lbl">Amount (TON)</label>
+      <div class="amt-field-wrap">
+        <input class="i-field" id="w-amt" type="number" placeholder="0.00" step="0.001" oninput="validateAmt()"/>
+        <div class="max-btn" onclick="setMax()">MAX</div>
+      </div>
+      <div class="avail-row">
+        <span class="avail-lbl">Available</span>
+        <span class="avail-val" id="w-avail">0.000000 TON</span>
+      </div>
+      <div class="i-err" id="amt-err">Insufficient balance</div>
+    </div>
+
+    <div class="sec-lbl" style="padding:0 0 8px">Transaction Details</div>
+    <div class="detail-rows">
+      <div class="d-row"><div class="d-lbl">Network Fee</div><div class="d-val" id="net-fee">0.001 TON</div></div>
+      <div class="d-row"><div class="d-lbl">Min Withdraw</div><div class="d-val" id="min-with">0.01 TON</div></div>
+      <div class="d-row"><div class="d-lbl">You Will Receive</div><div class="d-val" id="recv-amt" style="color:var(--green)">0.000 TON</div></div>
+    </div>
+
+    <button class="btn btn-red" id="w-btn" onclick="doWithdraw()">
+      <svg viewBox="0 0 24 24"><path d="M12 22V10"/><path d="m19 15-7-7-7 7"/><path d="M5 4h14"/></svg>
+      Confirm Withdraw
+    </button>
+  </div>
+</div>
+<!-- ══════════ HISTORY SCREEN ══════════ -->
+<div class="screen" id="s-history">
+  <div class="back-hdr">
+    <div class="back-btn" onclick="go('s-wallet')">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="back-title">History</div>
+  </div>
+
+  <div class="hist-filters">
+    <div class="filt-btn active" onclick="filt(this,'all')">All</div>
+    <div class="filt-btn" onclick="filt(this,'deposit')">Deposits</div>
+    <div class="filt-btn" onclick="filt(this,'withdraw')">Withdrawals</div>
+  </div>
+
+  <div class="hist-list" id="hist-list">
+    <div class="hist-empty">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <p>No transactions yet</p>
+      <span>Your transaction history will appear here</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════ API / SETTINGS SCREEN ══════════ -->
+<div class="screen" id="s-api">
+  <div class="back-hdr">
+    <div class="back-btn" onclick="go('s-wallet')">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="back-title">Settings & API</div>
+  </div>
+
+  <div class="api-content">
+
+    <!-- READ DOCUMENTATION BUTTON -->
+    <button class="docs-btn" onclick="openDocs()">
+      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Read Documentation
+    </button>
+
+    <div class="api-card">
+      <div class="field-lbl" style="margin-bottom:8px">User ID</div>
+      <input class="i-field" id="uid-input" type="text" placeholder="Enter your User ID (e.g. user_12345)" style="margin-bottom:14px"/>
+
+      <div class="field-lbl" style="margin-bottom:8px">Your API Key</div>
+      <div class="api-key-box empty" id="api-key-box">No API key yet — enter User ID and generate</div>
+
+      <button class="btn btn-blue" onclick="createApi()" id="gen-btn">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Generate API Key
+      </button>
+    </div>
+
+    <div class="sec-lbl" style="padding:0 0 8px">API Endpoints</div>
+    <div class="ep-list" style="padding-bottom:10px">
+      <div class="ep-item"><div class="ep-m m-post">POST</div><div><div class="ep-path">/api/register</div><div class="ep-desc">Register account & generate API key</div></div></div>
+      <div class="ep-item"><div class="ep-m m-get">GET</div><div><div class="ep-path">/api/balance</div><div class="ep-desc">Get wallet balance</div></div></div>
+      <div class="ep-item"><div class="ep-m m-get">GET</div><div><div class="ep-path">/api/deposit/info</div><div class="ep-desc">Get deposit address & memo</div></div></div>
+      <div class="ep-item"><div class="ep-m m-post">POST</div><div><div class="ep-path">/api/deposit/verify</div><div class="ep-desc">Verify on-chain deposit</div></div></div>
+      <div class="ep-item"><div class="ep-m m-post">POST</div><div><div class="ep-path">/api/withdraw</div><div class="ep-desc">Withdraw TON to address</div></div></div>
+      <div class="ep-item"><div class="ep-m m-get">GET</div><div><div class="ep-path">/api/transactions</div><div class="ep-desc">Transaction history list</div></div></div>
+    </div>
+  </div>
+</div>
+<!-- ══════════ BOTTOM NAV ══════════ -->
+<div class="bot-nav">
+  <div class="nav-it active" id="nav-wallet" onclick="go('s-wallet')">
+    <div class="nav-niw">
+      <div class="nav-ni">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </div>
+    </div>
+    <div class="nav-nl">Wallet</div>
+  </div>
+  <div class="nav-it" id="nav-deposit" onclick="go('s-deposit')">
+    <div class="nav-niw">
+      <div class="nav-ni">
+        <svg viewBox="0 0 24 24"><path d="M12 2v12"/><path d="m5 9 7 7 7-7"/><path d="M5 20h14"/></svg>
+      </div>
+    </div>
+    <div class="nav-nl">Deposit</div>
+  </div>
+  <div class="nav-it" id="nav-withdraw" onclick="go('s-withdraw')">
+    <div class="nav-niw">
+      <div class="nav-ni">
+        <svg viewBox="0 0 24 24"><path d="M12 22V10"/><path d="m19 15-7-7-7 7"/><path d="M5 4h14"/></svg>
+      </div>
+    </div>
+    <div class="nav-nl">Withdraw</div>
+  </div>
+  <div class="nav-it" id="nav-history" onclick="go('s-history')">
+    <div class="nav-niw">
+      <div class="nav-ni">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+    </div>
+    <div class="nav-nl">History</div>
+  </div>
+  <div class="nav-it" id="nav-api" onclick="go('s-api')">
+    <div class="nav-niw">
+      <div class="nav-ni">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      </div>
+    </div>
+    <div class="nav-nl">Settings</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_URL  = "https://safeora.onrender.com"
+const TON_USD  = 2.2
+const TON_FEE  = 0.001
+const TON_MIN  = 0.01
+const USDT_MIN = 0.01
+
+let hidden = false
+let histFilter = 'all'
+let currentWithdrawAsset = 'TON'
+
+let S = {
+  apiKey  : localStorage.getItem('sf_key')  || '',
+  userId  : localStorage.getItem('sf_uid')  || '',
+  depAddr : localStorage.getItem('sf_addr') || '',
+  depMemo : localStorage.getItem('sf_memo') || '',
+  balance : 0,
+  txs     : []
+}
+
+// ── SCREENS ──
+const SCREENS  = ['s-wallet','s-deposit','s-withdraw','s-history','s-api']
+const NAV_MAP  = {'s-wallet':'nav-wallet','s-deposit':'nav-deposit','s-withdraw':'nav-withdraw','s-history':'nav-history','s-api':'nav-api'}
+
+function go(id) {
+  SCREENS.forEach(s => document.getElementById(s).classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+  document.querySelectorAll('.nav-it').forEach(n => n.classList.remove('active'))
+  if (NAV_MAP[id]) document.getElementById(NAV_MAP[id]).classList.add('active')
+  if (id === 's-history')  { loadHistory(); renderHistory() }
+  if (id === 's-withdraw') updateWithdrawUI()
+  if (id === 's-deposit')  populateDeposit()
+}
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  if (S.apiKey) { showApiKey(S.apiKey); loadBalance(); loadHistory() }
+  populateDeposit()
+  if (S.userId) document.getElementById('uid-input').value = S.userId
+  updateWithdrawUI()
+})
+
+// ── BALANCE ──
+async function loadBalance() {
+  const btn = document.getElementById('refresh-btn')
+  btn.querySelector('svg').style.animation = 'spin .8s linear infinite'
+  if (!S.apiKey) { btn.querySelector('svg').style.animation=''; return }
+  try {
+    const r = await fetch(API_URL+'/api/balance',{headers:{'x-api-key':S.apiKey}})
+    const d = await r.json()
+    if (d.success) { S.balance = parseFloat(d.balance)||0; updateUI() }
+  } catch(e) { toast('Connection error','err') }
+  btn.querySelector('svg').style.animation = ''
+}
+
+function updateUI() {
+  const b = S.balance
+  const usd = (b * TON_USD).toFixed(2)
+  document.getElementById('totalUsd').textContent  = hidden ? '$••••' : '$'+usd
+  document.getElementById('tonSub').textContent    = hidden ? '≈ ••••••' : '≈ '+b.toFixed(6)+' TON'
+  document.getElementById('tonBal').textContent    = hidden ? '••••••' : b.toFixed(6)
+  document.getElementById('tonUsdVal').textContent = hidden ? '••••' : '$'+usd
+  updateWithdrawUI()
+}
+
+function toggleHide() {
+  hidden = !hidden
+  const svg = document.getElementById('eye-icon')
+  svg.innerHTML = hidden
+    ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+    : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+  updateUI()
+}
