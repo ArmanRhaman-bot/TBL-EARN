@@ -799,3 +799,240 @@ function toggleHide() {
     : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
   updateUI()
 }
+
+// ── CREATE API ──
+async function createApi() {
+  const uid = document.getElementById('uid-input').value.trim()
+  if (!uid) { toast('Enter a User ID','err'); return }
+  const btn = document.getElementById('gen-btn')
+  btn.disabled = true
+  btn.innerHTML = '<svg viewBox="0 0 24 24" style="animation:spin .8s linear infinite;width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Generating...'
+  try {
+    const r = await fetch(API_URL+'/api/register',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({user_id:uid})
+    })
+    const d = await r.json()
+    if (d.success) {
+      S.apiKey=d.api_key; S.userId=uid
+      S.depAddr=d.deposit_info?.address||''; S.depMemo=d.deposit_info?.memo||''
+      localStorage.setItem('sf_key',S.apiKey); localStorage.setItem('sf_uid',S.userId)
+      localStorage.setItem('sf_addr',S.depAddr); localStorage.setItem('sf_memo',S.depMemo)
+      showApiKey(S.apiKey); populateDeposit(); loadBalance()
+      toast('API key generated!','ok')
+    } else { toast(d.error||'Error occurred','err') }
+  } catch(e) { toast('Server connection failed','err') }
+  finally {
+    btn.disabled=false
+    btn.innerHTML='<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Generate API Key'
+  }
+}
+
+function showApiKey(key) {
+  const b = document.getElementById('api-key-box')
+  b.textContent = key; b.classList.remove('empty')
+  document.getElementById('apiStatusTxt').textContent = 'Key active: '+key.slice(0,16)+'...'
+}
+
+// ── DEPOSIT ──
+function populateDeposit() {
+  document.getElementById('dep-addr').textContent = S.depAddr || '— Generate API key first'
+  document.getElementById('dep-memo').textContent = S.depMemo || '—'
+  const qa = document.getElementById('qr-area')
+  if (S.depAddr) {
+    qa.innerHTML = `<div class="qr-wrap"><img src="https://api.qrserver.com/v1/create-qr-code/?size=126x126&data=${encodeURIComponent(S.depAddr)}" alt="QR"/></div>`
+  }
+}
+
+function switchDepAsset(el, asset) {
+  document.querySelectorAll('#s-deposit .a-tab').forEach(t=>t.classList.remove('active'))
+  el.classList.add('active')
+}
+
+async function verifyDeposit() {
+  if (!S.apiKey) { toast('Generate API key first','err'); return }
+  const btn = document.getElementById('verify-btn')
+  btn.disabled=true
+  btn.innerHTML='<svg viewBox="0 0 24 24" style="animation:spin .8s linear infinite;width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Checking blockchain...'
+  try {
+    const r = await fetch(API_URL+'/api/deposit/verify',{method:'POST',headers:{'x-api-key':S.apiKey}})
+    const d = await r.json()
+    if (d.success) {
+      toast(d.message,'ok'); S.balance=d.new_balance||S.balance; updateUI(); loadHistory()
+    } else { toast(d.message||'No new deposit found','err') }
+  } catch(e) { toast('Server connection failed','err') }
+  finally {
+    btn.disabled=false
+    btn.innerHTML='<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg> Verify Deposit'
+  }
+}
+
+// ── WITHDRAW ──
+function switchWithdrawAsset(el, asset) {
+  document.querySelectorAll('#s-withdraw .a-tab').forEach(t=>t.classList.remove('active'))
+  el.classList.add('active')
+  currentWithdrawAsset = asset
+  updateWithdrawUI()
+}
+
+function updateWithdrawUI() {
+  const isUSDT = currentWithdrawAsset === 'USDT'
+  document.getElementById('amt-lbl').textContent = isUSDT ? 'Amount (USDT)' : 'Amount (TON)'
+  document.getElementById('net-fee').textContent = isUSDT ? '0 USDT' : '0.001 TON'
+  document.getElementById('min-with').textContent = isUSDT ? '0.01 USDT' : '0.01 TON'
+  document.getElementById('w-avail').textContent = isUSDT ? '0.00 USDT' : S.balance.toFixed(6)+' TON'
+  document.getElementById('recv-amt').textContent = '0.000 ' + currentWithdrawAsset
+  document.getElementById('w-amt').placeholder = '0.00'
+  validateAmt()
+}
+
+function setMax() {
+  const isUSDT = currentWithdrawAsset === 'USDT'
+  document.getElementById('w-amt').value = isUSDT ? '0.00' : Math.max(0, S.balance - TON_FEE).toFixed(6)
+  validateAmt()
+}
+
+function validateAddr() {
+  const addr = document.getElementById('w-addr').value.trim()
+  const errEl = document.getElementById('addr-err')
+  const okEl  = document.getElementById('addr-ok')
+  const field = document.getElementById('w-addr')
+  if (!addr) { field.classList.remove('error','ok'); errEl.classList.remove('show'); okEl.classList.remove('show'); return true }
+  // TON address: starts with EQ/UQ, 48 chars base64
+  const valid = /^[EU]Q[A-Za-z0-9_-]{46}$/.test(addr)
+  field.classList.toggle('error', !valid)
+  field.classList.toggle('ok', valid)
+  errEl.classList.toggle('show', !valid)
+  okEl.classList.toggle('show', valid)
+  return valid
+}
+
+function validateAmt() {
+  const amt   = parseFloat(document.getElementById('w-amt').value) || 0
+  const errEl = document.getElementById('amt-err')
+  const field = document.getElementById('w-amt')
+  const isUSDT = currentWithdrawAsset === 'USDT'
+  const minAmt = isUSDT ? USDT_MIN : TON_MIN
+  const maxAmt = isUSDT ? 0 : S.balance
+  const fee    = isUSDT ? 0 : TON_FEE
+  let errMsg = ''
+  if (amt > 0 && amt < minAmt) errMsg = `Minimum withdraw is ${minAmt} ${currentWithdrawAsset}`
+  else if (!isUSDT && amt > S.balance) errMsg = 'Insufficient TON balance'
+  field.classList.toggle('error', !!errMsg && amt > 0)
+  errEl.textContent = errMsg
+  errEl.classList.toggle('show', !!errMsg && amt > 0)
+  // update receive amount
+  const recv = Math.max(0, amt - fee)
+  document.getElementById('recv-amt').textContent = recv.toFixed(4)+' '+currentWithdrawAsset
+  return !errMsg
+}
+
+async function doWithdraw() {
+  if (!S.apiKey) { toast('Generate API key first','err'); return }
+  const addr   = document.getElementById('w-addr').value.trim()
+  const amt    = parseFloat(document.getElementById('w-amt').value)
+  const isUSDT = currentWithdrawAsset === 'USDT'
+  const minAmt = isUSDT ? USDT_MIN : TON_MIN
+
+  if (!validateAddr()) { toast('Invalid TON address','err'); return }
+  if (!amt || amt <= 0) { toast('Enter an amount','err'); return }
+  if (amt < minAmt) { toast(`Minimum is ${minAmt} ${currentWithdrawAsset}`,'err'); return }
+  if (!isUSDT && amt > S.balance) { toast('Insufficient balance','err'); return }
+
+  const btn = document.getElementById('w-btn')
+  btn.disabled=true
+  btn.innerHTML='<svg viewBox="0 0 24 24" style="animation:spin .8s linear infinite;width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Processing...'
+  try {
+    const r = await fetch(API_URL+'/api/withdraw',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':S.apiKey},
+      body:JSON.stringify({wallet:addr, amount:amt})
+    })
+    const d = await r.json()
+    if (d.success) {
+      toast('Withdrawal successful!','ok')
+      S.balance=d.new_balance||S.balance; updateUI()
+      document.getElementById('w-addr').value=''
+      document.getElementById('w-amt').value=''
+      document.getElementById('w-addr').classList.remove('ok')
+      document.getElementById('addr-ok').classList.remove('show')
+      document.getElementById('recv-amt').textContent='0.000 '+currentWithdrawAsset
+      loadHistory()
+    } else { toast(d.error||'Withdrawal failed','err') }
+  } catch(e) { toast('Server connection failed','err') }
+  finally {
+    btn.disabled=false
+    btn.innerHTML='<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 22V10"/><path d="m19 15-7-7-7 7"/><path d="M5 4h14"/></svg> Confirm Withdraw'
+  }
+}
+
+// ── HISTORY ──
+async function loadHistory() {
+  if (!S.apiKey) return
+  try {
+    const r = await fetch(API_URL+'/api/transactions',{headers:{'x-api-key':S.apiKey}})
+    const d = await r.json()
+    if (d.success) { S.txs=d.transactions||[]; renderHistory() }
+  } catch(e) {}
+}
+
+function filt(el,f) {
+  document.querySelectorAll('.filt-btn').forEach(b=>b.classList.remove('active'))
+  el.classList.add('active'); histFilter=f; renderHistory()
+}
+
+function renderHistory() {
+  const list = document.getElementById('hist-list')
+  const txs  = histFilter==='all' ? S.txs : S.txs.filter(t=>t.type===histFilter)
+  if (!txs.length) {
+    list.innerHTML=`<div class="hist-empty"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><p>No transactions yet</p><span>Your history will appear here</span></div>`
+    return
+  }
+  list.innerHTML = [...txs].reverse().map(tx => {
+    const isD = tx.type==='deposit'
+    const d   = new Date(tx.time)
+    const dt  = d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})
+    return `<div class="hist-item ${isD?'h-dep':'h-with'}">
+      <div class="hist-ico">
+        <svg viewBox="0 0 24 24">${isD ? '<path d="M12 2v12"/><path d="m5 9 7 7 7-7"/><path d="M5 20h14"/>' : '<path d="M12 22V10"/><path d="m19 15-7-7-7 7"/><path d="M5 4h14"/>'}</svg>
+      </div>
+      <div>
+        <div class="h-type">${isD?'Deposit':'Withdraw'}</div>
+        <div class="h-date">${dt}</div>
+      </div>
+      <div class="h-right">
+        <div class="h-amt ${isD?'pos':'neg'}">${isD?'+':'-'}${parseFloat(tx.amount).toFixed(4)} TON</div>
+        <div class="h-badge b-ok">Confirmed</div>
+      </div>
+    </div>`
+  }).join('')
+}
+
+// ── COPY ──
+function cp(id, label) {
+  const v = document.getElementById(id).textContent
+  if (v === '—' || v.includes('Generate')) { toast('Generate API key first','err'); return }
+  navigator.clipboard.writeText(v).then(()=>toast(label+' copied!','inf')).catch(()=>{
+    const ta=document.createElement('textarea'); ta.value=v
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy')
+    document.body.removeChild(ta); toast(label+' copied!','inf')
+  })
+}
+
+// ── DOCS ──
+function openDocs() { window.open('/docs','_blank') }
+
+// ── TOAST ──
+function toast(msg,type='inf') {
+  const t=document.getElementById('toast')
+  t.textContent=msg; t.className='toast '+type+' show'
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800)
+}
+
+// ── SPIN KEYFRAME ──
+const style=document.createElement('style')
+style.textContent='@keyframes spin{to{transform:rotate(360deg)}}'
+document.head.appendChild(style)
+</script>
+</body>
+</html>
